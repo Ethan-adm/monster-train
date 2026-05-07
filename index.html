@@ -13,11 +13,15 @@
     <div class="game-area">
         
         <div id="battle-arena">
-            <h2>Ligne de Front (Les 5 Gares)</h2>
-            <div class="tracks-container">
-                
-                <div class="station-row">
-                    <div class="wagon-slot player-slot" id="p-slot-1"><span class="slot-text">Ton Wagon 1</span></div>
+            <h2 id="phase-title">En attente du joueur...</h2>
+            
+            <div class="tracks-container" id="tracks">
+                <div id="player-train">🚂</div>
+
+                <div class="rail-line"></div>
+
+                <div class="station-row" id="row-1">
+                    <div class="wagon-slot player-slot" id="p-slot-1"><span class="slot-text">Vide</span></div>
                     <div class="station-center">
                         <div class="station-number">Gare 1</div>
                         <div class="vs-badge">VS</div>
@@ -25,8 +29,8 @@
                     <div class="wagon-slot enemy-slot" id="e-slot-1"><span class="slot-text">Ennemi 1</span></div>
                 </div>
 
-                <div class="station-row">
-                    <div class="wagon-slot player-slot" id="p-slot-2"><span class="slot-text">Ton Wagon 2</span></div>
+                <div class="station-row" id="row-2">
+                    <div class="wagon-slot player-slot" id="p-slot-2"><span class="slot-text">Vide</span></div>
                     <div class="station-center">
                         <div class="station-number">Gare 2</div>
                         <div class="vs-badge">VS</div>
@@ -34,8 +38,8 @@
                     <div class="wagon-slot enemy-slot" id="e-slot-2"><span class="slot-text">Ennemi 2</span></div>
                 </div>
 
-                <div class="station-row">
-                    <div class="wagon-slot player-slot" id="p-slot-3"><span class="slot-text">Ton Wagon 3</span></div>
+                <div class="station-row" id="row-3">
+                    <div class="wagon-slot player-slot" id="p-slot-3"><span class="slot-text">Vide</span></div>
                     <div class="station-center">
                         <div class="station-number">Gare 3</div>
                         <div class="vs-badge">VS</div>
@@ -43,8 +47,8 @@
                     <div class="wagon-slot enemy-slot" id="e-slot-3"><span class="slot-text">Ennemi 3</span></div>
                 </div>
 
-                <div class="station-row">
-                    <div class="wagon-slot player-slot" id="p-slot-4"><span class="slot-text">Ton Wagon 4</span></div>
+                <div class="station-row" id="row-4">
+                    <div class="wagon-slot player-slot" id="p-slot-4"><span class="slot-text">Vide</span></div>
                     <div class="station-center">
                         <div class="station-number">Gare 4</div>
                         <div class="vs-badge">VS</div>
@@ -52,8 +56,8 @@
                     <div class="wagon-slot enemy-slot" id="e-slot-4"><span class="slot-text">Ennemi 4</span></div>
                 </div>
 
-                <div class="station-row">
-                    <div class="wagon-slot player-slot" id="p-slot-5"><span class="slot-text">Ton Wagon 5</span></div>
+                <div class="station-row" id="row-5">
+                    <div class="wagon-slot player-slot" id="p-slot-5"><span class="slot-text">Vide</span></div>
                     <div class="station-center">
                         <div class="station-number">Gare 5</div>
                         <div class="vs-badge">VS</div>
@@ -65,10 +69,11 @@
         </div>
 
         <div id="player-hand-section">
-            <h2>Ta Main (<span id="deck-count">60</span> cartes dans le deck)</h2>
+            <h2 id="instruction-text">Commence la partie en piochant !</h2>
+            <p>(<span id="deck-count">60</span> cartes dans le deck)</p>
             <div id="hand-container">
                 </div>
-            <button id="draw-btn" onclick="demarrerPartie()">Piocher le 1er tour (8 cartes)</button>
+            <button id="draw-btn" onclick="demarrerPartie()">Piocher 8 cartes (Tour 1)</button>
         </div>
     </div>
 
