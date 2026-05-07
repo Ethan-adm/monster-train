@@ -1,9 +1,5 @@
-/* --- L'ÉCRAN PRÊT (OVERLAY) --- */
-#ready-screen {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(26, 37, 47, 0.95); display: flex; flex-direction: column;
-    justify-content: center; align-items: center; z-index: 1000; color: white;
-}
+/* --- L'ÉCRAN PRÊT --- */
+#ready-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 37, 47, 0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; color: white; }
 #ready-title { font-size: 4rem; color: var(--accent-yellow); margin-bottom: 10px; }
 #status-text { font-size: 1.5rem; color: var(--light-teal); margin-bottom: 40px; }
 .players-status { display: flex; gap: 50px; margin-bottom: 40px; }
@@ -14,25 +10,17 @@
 #ready-btn { padding: 15px 40px; font-size: 2rem; background-color: var(--secondary-teal); border:none; border-radius:8px; color:white; cursor:pointer;}
 #ready-btn:disabled { background-color: #7f8c8d; cursor: not-allowed; }
 
-/* Core Colors and Fonts */
+/* Core Colors */
 :root {
-    --primary-red-pink: #e74c3c;
-    --secondary-teal: #008080;
-    --light-teal: #40e0d0;
-    --accent-yellow: #f1c40f;
-    --bg-dark-1: #1a252f;
-    --bg-dark-2: #2c3e50;
-    --card-body-teal-gradient: linear-gradient(135deg, #006060 0%, #008080 100%);
+    --primary-red-pink: #e74c3c; --secondary-teal: #008080; --light-teal: #40e0d0; --accent-yellow: #f1c40f;
+    --bg-dark-1: #1a252f; --bg-dark-2: #2c3e50; --text-white: #ecf0f1;
+    --color-combat: linear-gradient(135deg, #006060, #008080);
+    --color-soutien: linear-gradient(135deg, #ff9ff3, #f368e0);
+    --color-sabotage: linear-gradient(135deg, #ff6b6b, #ee5253);
     --enemy-gradient: linear-gradient(135deg, #8e44ad 0%, #c0392b 100%);
-    --text-white: #ecf0f1;
 }
 
-body {
-    background: linear-gradient(135deg, var(--bg-dark-1) 0%, var(--bg-dark-2) 100%);
-    color: var(--text-white); margin: 0; font-family: 'Avenir', sans-serif;
-    text-align: center; padding: 20px; overflow-x: hidden;
-}
-
+body { background: linear-gradient(135deg, var(--bg-dark-1) 0%, var(--bg-dark-2) 100%); color: var(--text-white); margin: 0; font-family: 'Avenir', sans-serif; text-align: center; padding: 20px; overflow-x: hidden; }
 h1 { font-family: 'Luckiest Guy', cursive; color: var(--secondary-teal); font-size: 3rem; margin-bottom: 5px; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); }
 #header-info { display: flex; justify-content: space-between; align-items: center; width: 800px; }
 h2 { color: var(--light-teal); font-size: 1.5rem; margin: 0; }
@@ -44,50 +32,45 @@ h2 { color: var(--light-teal); font-size: 1.5rem; margin: 0; }
 
 .game-area { display: flex; flex-direction: column; align-items: center; gap: 15px; }
 
-/* --- LE PLATEAU DE JEU --- */
+/* LE PLATEAU */
 #board { position: relative; width: 800px; height: 600px; background-color: #2c3e50; border: 4px solid var(--secondary-teal); border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); overflow: hidden; }
 .track-loop { position: absolute; top: 80px; width: 280px; height: 440px; border-radius: 20px; }
 .player-track { left: 80px; border: 6px solid var(--secondary-teal); box-shadow: inset 0 0 10px rgba(0,0,0,0.3); }
 .enemy-track { left: 440px; border: 6px solid #8e44ad; box-shadow: inset 0 0 10px rgba(0,0,0,0.3); }
 
 .gare-box { position: absolute; width: 60px; height: 40px; background-color: var(--bg-dark-1); border: 2px solid var(--accent-yellow); color: var(--accent-yellow); display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 0.9rem; border-radius: 5px; z-index: 5; }
-.enemy-combat-slot { position: absolute; width: 60px; height: 60px; border: 2px solid var(--primary-red-pink); background-color: rgba(231, 76, 60, 0.2); border-radius: 8px; display: flex; justify-content: center; align-items: center; color: #e74c3c; font-weight: bold; }
+.enemy-combat-slot { position: absolute; width: 60px; height: 60px; border: 2px solid var(--primary-red-pink); background-color: rgba(231, 76, 60, 0.2); border-radius: 8px; display: flex; justify-content: center; align-items: center; color: #e74c3c; font-weight: bold; font-size: 0.8rem;}
 .vs-badge { position: absolute; background-color: #c0392b; color: white; font-size: 0.8rem; font-weight: bold; padding: 4px 8px; border-radius: 50%; z-index: 10; }
 
-/* --- LES LOCOMOTIVES ET FLAMMES --- */
-#loco, #enemy-loco {
-    position: absolute; width: 60px; height: 60px; font-size: 45px;
-    display: flex; justify-content: center; align-items: center; z-index: 100; display: none;
-    filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.5));
-}
-.flames::after {
-    content: '🔥'; position: absolute; left: -30px; top: 10px; font-size: 35px;
-    animation: flicker 0.2s infinite alternate; z-index: -1;
-}
-@keyframes flicker {
-    0% { transform: scale(1) rotate(-5deg); opacity: 0.8; }
-    100% { transform: scale(1.2) rotate(5deg); opacity: 1; }
-}
+/* LOCOMOTIVES ET WAGONS */
+#loco, #enemy-loco { position: absolute; width: 60px; height: 60px; font-size: 45px; display: flex; justify-content: center; align-items: center; z-index: 100; display: none; filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.5)); }
+.flames::after { content: '🔥'; position: absolute; left: -30px; top: 10px; font-size: 35px; animation: flicker 0.2s infinite alternate; z-index: -1; }
+@keyframes flicker { 0% { transform: scale(1) rotate(-5deg); opacity: 0.8; } 100% { transform: scale(1.2) rotate(5deg); opacity: 1; } }
 
-/* --- WAGONS JOUER ET ENNEMI --- */
-.wagon-ingame, .enemy-wagon-ingame {
-    position: absolute; width: 50px; height: 70px;
-    border-radius: 8px; display: flex; justify-content: center; align-items: center;
-    color: white; font-weight: bold; font-size: 1.5rem; z-index: 50;
-    box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
-}
-.wagon-ingame { background: var(--card-body-teal-gradient); border: 3px solid var(--light-teal); }
-.enemy-wagon-ingame { background: var(--enemy-gradient); border: 3px solid var(--primary-red-pink); }
+.wagon-ingame, .enemy-wagon-ingame { position: absolute; width: 50px; height: 70px; border-radius: 8px; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold; font-size: 1.5rem; z-index: 50; box-shadow: 2px 2px 10px rgba(0,0,0,0.5); border: 3px solid #fff; }
+.enemy-wagon-ingame { background: var(--enemy-gradient); border-color: var(--primary-red-pink); }
+.type-combat { background: var(--color-combat); }
+.type-soutien { background: var(--color-soutien); }
+.type-sabotage { background: var(--color-sabotage); }
 
-/* Animation pour révéler la carte ennemie */
 .reveal-anim { animation: flipReveal 0.6s ease-in-out forwards; }
-@keyframes flipReveal {
-    0% { transform: rotateY(0deg); }
-    50% { transform: rotateY(90deg); background: var(--card-body-teal-gradient); border-color: var(--light-teal); color: transparent; }
-    100% { transform: rotateY(0deg); background: var(--card-body-teal-gradient); border-color: var(--light-teal); }
-}
+@keyframes flipReveal { 0% { transform: rotateY(0deg); } 50% { transform: rotateY(90deg); color: transparent; } 100% { transform: rotateY(0deg); } }
 
-/* --- LA MAIN --- */
-#hand-container { display: flex; gap: 10px; justify-content: center; min-height: 120px; margin-bottom: 10px; }
-.carte { width: 70px; height: 110px; background: var(--card-body-teal-gradient); border: 2px solid var(--accent-yellow); border-radius: 8px; display: flex; justify-content: center; align-items: center; cursor: pointer; font-weight: bold; font-size: 1.5rem; transition: transform 0.2s; }
+/* --- DECKS ET MAIN --- */
+#bottom-section { display: flex; width: 800px; gap: 20px; align-items: flex-start; margin-top: 10px;}
+#decks-container { display: flex; flex-direction: column; gap: 10px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; border: 2px solid #34495e; }
+.deck-pile { width: 80px; height: 50px; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: bold; font-size: 0.9rem; border: 2px solid white; box-shadow: 2px 2px 5px rgba(0,0,0,0.5); }
+.deck-combat { background: var(--color-combat); }
+.deck-soutien { background: var(--color-soutien); }
+.deck-sabotage { background: var(--color-sabotage); }
+.deck-count { font-size: 1.2rem; color: var(--accent-yellow); }
+
+#player-hand-section { flex: 1; text-align: left; }
+#hand-container { display: flex; flex-wrap: wrap; gap: 10px; min-height: 120px; }
+
+.carte { width: 60px; height: 90px; border: 2px solid white; border-radius: 8px; display: flex; justify-content: center; align-items: center; cursor: pointer; font-weight: bold; font-size: 1.5rem; transition: transform 0.2s; color: white;}
 .carte:hover { transform: translateY(-10px) scale(1.05); }
+
+/* Animation Pioche */
+#animation-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; }
+.anim-card { position: absolute; transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1); box-shadow: 0 10px 20px rgba(0,0,0,0.5); font-size: 2rem; }
