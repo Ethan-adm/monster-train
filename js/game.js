@@ -38,8 +38,13 @@ function configurerConnexion() {
             verifierLancement();
         }
         else if (data.type === 'card_played') {
-            enemyTrain.addWagon(data.label, true, 'combat'); // Masqué pour l'ennemi
+            enemyTrain.addWagon(data.label, true, 'combat'); 
             if (data.fast) enemyTrain.speedUp();
+        }
+        else if (data.type === 'special_played') {
+            // L'ennemi a placé une carte spéciale
+            let targetIsJoueur = !data.isTrainJoueur; // Inversion du point de vue
+            ajouterBadgeVisuel(targetIsJoueur, data.index, { type: data.carteType, label: data.label });
         }
     });
 }
@@ -69,8 +74,13 @@ function verifierLancement() {
 // --- GESTION DU JEU ET DES DECKS ---
 let deckCombat = []; let deckSoutien = []; let deckSabotage = [];
 let mainDuJoueur = [];
+
+// Phases
 let etapeGare = 1;
+let phaseSoutienSabotage = false; // Nouveau !
+let carteSelectionnee = null;     // Carte en main prête à être posée sur un wagon
 let carteDejaJoueePourCettePhase = false;
+
 let tempsTotalPhase = 0; let tempsRestant = 0; let intervalTimer = null;
 
 const parcours = {
@@ -80,7 +90,7 @@ const parcours = {
     gare5: {x: 220, y: 520, r: 90}, coinBR: {x: 360, y: 520, r: 90},
     combat5: {x: 360, y: 520, r: 0}, combat4: {x: 360, y: 420, r: 0},
     combat3: {x: 360, y: 320, r: 0}, combat2: {x: 360, y: 220, r: 0},
-    combat1: {x: 360, y: 120, r: 0}, sortie: {x: 360, y: -60, r: 0} // La loco s'écarte complètement !
+    combat1: {x: 360, y: 120, r: 0}, sortie: {x: 360, y: -60, r: 0}
 };
 
 const enemyParcours = {
@@ -117,6 +127,12 @@ class TrainController {
         let wagonDiv = document.createElement('div');
         wagonDiv.className = this.isPlayer ? `wagon-ingame type-${type}` : 'enemy-wagon-ingame';
         
+        let indexWagon = this.wagons.length; // Pour cibler plus tard
+        wagonDiv.dataset.index = indexWagon;
+        
+        // Rendre cliquable pour la phase Soutien/Sabotage
+        wagonDiv.onclick = () => clicSurWagon(this.isPlayer, indexWagon);
+
         if (isHidden) {
             wagonDiv.innerText = "?";
             wagonDiv.dataset.realValue = label; 
@@ -128,7 +144,7 @@ class TrainController {
         document.getElementById('wagons-layer').appendChild(wagonDiv);
         let wPos = this.history[this.history.length - 1];
         placerElement(wagonDiv, wPos);
-        this.wagons.unshift(wagonDiv);
+        this.wagons.unshift(wagonDiv); // Ajoute au début du train !
     }
 
     moveToStation(stationNum, timeMs) {
@@ -184,7 +200,7 @@ class TrainController {
         this.wagons.forEach(w => {
             if (w.dataset.realValue) {
                 w.innerText = w.dataset.realValue;
-                w.className = `wagon-ingame type-${w.dataset.realType} reveal-anim`; // Prend sa vraie couleur !
+                w.className = `wagon-ingame type-${w.dataset.realType} reveal-anim`; 
             }
         });
     }
@@ -245,22 +261,13 @@ function creerAnimationCarte(carte) {
         document.getElementById('animation-layer').appendChild(animDiv);
 
         setTimeout(() => {
-            // Vole au centre
-            animDiv.style.left = '50%';
-            animDiv.style.top = '30%';
+            animDiv.style.left = '50%'; animDiv.style.top = '30%';
             animDiv.style.transform = 'translate(-50%, -50%) scale(1.5)';
-            
             setTimeout(() => {
-                // Va dans la main (vers le bas)
-                animDiv.style.left = '50%';
-                animDiv.style.top = '90%';
+                animDiv.style.left = '50%'; animDiv.style.top = '90%';
                 animDiv.style.transform = 'translate(-50%, 0) scale(0.5)';
                 animDiv.style.opacity = '0';
-                
-                setTimeout(() => {
-                    animDiv.remove();
-                    resolve();
-                }, 400);
+                setTimeout(() => { animDiv.remove(); resolve(); }, 400);
             }, 600);
         }, 50);
     });
@@ -269,15 +276,101 @@ function creerAnimationCarte(carte) {
 function afficherMain() {
     const handContainer = document.getElementById('hand-container');
     handContainer.innerHTML = ''; 
+    
     mainDuJoueur.forEach(carte => { 
         let divCarte = document.createElement('div'); 
         divCarte.className = `carte type-${carte.type}`; 
         divCarte.innerText = carte.label; 
-        divCarte.onclick = () => jouerCarte(carte.id); 
+        
+        // --- LOGIQUE VISUELLE DE BLOCAGE ---
+        if (!phaseSoutienSabotage && carte.type !== 'combat') {
+            divCarte.classList.add('disabled-card'); // Gares = Bloque Soutien/Sabot
+        } else if (phaseSoutienSabotage && carte.type === 'combat') {
+            divCarte.classList.add('disabled-card'); // Arène = Bloque Combat
+        } else if (carteSelectionnee && carteSelectionnee.id === carte.id) {
+            divCarte.classList.add('selected-card'); // Effet Selection
+        }
+
+        divCarte.onclick = () => selectionnerOuJouerCarte(carte); 
         handContainer.appendChild(divCarte); 
     }); 
 }
 
+function selectionnerOuJouerCarte(carte) {
+    if (!phaseSoutienSabotage) {
+        // Phase classique : Poser des monstres
+        if (carte.type !== 'combat') return; // Clic interdit
+        jouerCarteMonstre(carte.id);
+    } else {
+        // Phase Spéciale : Ciblage
+        if (carte.type === 'combat') return; // Clic interdit
+        
+        // On sélectionne / désélectionne
+        if (carteSelectionnee && carteSelectionnee.id === carte.id) {
+            carteSelectionnee = null;
+        } else {
+            carteSelectionnee = carte;
+        }
+        afficherMain(); // Met à jour le visuel
+    }
+}
+
+function jouerCarteMonstre(idCarte) {
+    if (etapeGare > 5 || carteDejaJoueePourCettePhase) return;
+    carteDejaJoueePourCettePhase = true;
+
+    let isFast = tempsRestant >= (tempsTotalPhase / 2);
+    let index = mainDuJoueur.findIndex(c => c.id === idCarte);
+    let carte = mainDuJoueur[index];
+    
+    mainDuJoueur.splice(index, 1);
+    afficherMain();
+
+    playerTrain.addWagon(carte.label, false, carte.type);
+    if (isFast) playerTrain.speedUp();
+
+    if (networkConn && networkConn.open) {
+        networkConn.send({ type: 'card_played', etape: etapeGare, label: carte.label, fast: isFast });
+    }
+}
+
+// --- CLIC SUR LES WAGONS (PHASE 6) ---
+function clicSurWagon(isTrainJoueur, indexWagon) {
+    if (!phaseSoutienSabotage || !carteSelectionnee) return;
+
+    if (carteSelectionnee.type === 'soutien' && isTrainJoueur) {
+        placerCarteSpeciale(isTrainJoueur, indexWagon, carteSelectionnee);
+    } else if (carteSelectionnee.type === 'sabotage' && !isTrainJoueur) {
+        placerCarteSpeciale(isTrainJoueur, indexWagon, carteSelectionnee);
+    }
+    // Sinon rien (on ne sabote pas ses propres wagons !)
+}
+
+function placerCarteSpeciale(isTrainJoueur, indexWagon, carte) {
+    let index = mainDuJoueur.findIndex(c => c.id === carte.id);
+    mainDuJoueur.splice(index, 1); // Retire de la main
+    carteSelectionnee = null;
+    afficherMain();
+
+    ajouterBadgeVisuel(isTrainJoueur, indexWagon, carte);
+
+    if (networkConn && networkConn.open) {
+        networkConn.send({ type: 'special_played', isTrainJoueur: isTrainJoueur, index: indexWagon, carteType: carte.type, label: carte.label });
+    }
+}
+
+function ajouterBadgeVisuel(isTrainJoueur, indexWagon, carte) {
+    let train = isTrainJoueur ? playerTrain : enemyTrain;
+    let wagonDiv = train.wagons.find(w => w.dataset.index == indexWagon);
+    if (!wagonDiv) return;
+
+    let badge = document.createElement('div');
+    badge.className = `badge-${carte.type}`;
+    badge.innerText = carte.label;
+    wagonDiv.appendChild(badge);
+}
+
+// --- GESTION DES PHASES ---
 function lancerPhase(numGare) {
     etapeGare = numGare; carteDejaJoueePourCettePhase = false;
 
@@ -306,10 +399,15 @@ function lancerTimer(secondes) {
 
         if (tempsRestant <= 0) {
             clearInterval(intervalTimer);
-            if (!carteDejaJoueePourCettePhase && mainDuJoueur.length > 0) {
-                jouerCarte(mainDuJoueur[0].id); // Joue la 1ere carte auto si AFK
+            
+            if (phaseSoutienSabotage) {
+                // Fin des 25s : On révèle ! Pas d'aléatoire.
+                terminerPhaseSpeciale();
+            } else {
+                // Phase Gares
+                if (!carteDejaJoueePourCettePhase) jouerCarteAleatoire();
+                setTimeout(() => { lancerPhase(etapeGare + 1); }, 1000);
             }
-            setTimeout(() => { lancerPhase(etapeGare + 1); }, 1000);
         }
     }, 1000);
 }
@@ -321,38 +419,48 @@ function actualiserAffichageTimer() {
     else display.classList.remove('timer-danger');
 }
 
-function jouerCarte(idCarte) {
-    if (etapeGare > 5 || carteDejaJoueePourCettePhase) return;
-    carteDejaJoueePourCettePhase = true;
-
-    let isFast = tempsRestant >= (tempsTotalPhase / 2);
-    let index = mainDuJoueur.findIndex(c => c.id === idCarte);
-    let carte = mainDuJoueur[index];
-    
-    mainDuJoueur.splice(index, 1);
-    afficherMain();
-
-    playerTrain.addWagon(carte.label, false, carte.type);
-    if (isFast) playerTrain.speedUp();
-
-    if (networkConn && networkConn.open) {
-        networkConn.send({ type: 'card_played', etape: etapeGare, label: carte.label, fast: isFast, carteType: carte.type });
+function jouerCarteAleatoire() {
+    // Ne pioche que dans les cartes Combat pendant les gares
+    let cartesCombatEnMain = mainDuJoueur.filter(c => c.type === 'combat');
+    if (cartesCombatEnMain.length > 0) {
+        jouerCarteMonstre(cartesCombatEnMain[0].id); 
     }
 }
 
+// --- PHASE 6 : CINEMATIQUE ET SOUTIEN ---
 function lancerCinematiqueCombat() {
     document.getElementById('phase-title').innerText = "⚔️ LE TRAIN ENTRE DANS L'ARÈNE ! ⚔️";
     playerTrain.moveToStation(6, 4000);
     enemyTrain.moveToStation(6, 4000);
 
     setTimeout(() => {
-        // Force les positions finales exactes pour éviter tout bug d'affichage
         placerElement(playerTrain.loco, parcours.sortie);
         placerElement(enemyTrain.loco, enemyParcours.sortie);
         playerTrain.wagons.forEach((w, i) => placerElement(w, parcours[`combat${5-i}`]));
         enemyTrain.wagons.forEach((w, i) => placerElement(w, enemyParcours[`combat${5-i}`]));
 
-        document.getElementById('phase-title').innerText = "⚔️ COMBAT FACE À FACE ⚔️";
-        enemyTrain.revealWagons();
+        demarrerPhaseSoutienSabotage();
     }, 4500);
+}
+
+function demarrerPhaseSoutienSabotage() {
+    phaseSoutienSabotage = true;
+    document.getElementById('phase-title').innerText = "✨ SOUTIEN & SABOTAGE ✨";
+    document.getElementById('instruction-text').innerText = "Place ton Soutien sur TOI, et ton Sabotage sur L'ENNEMI !";
+    document.getElementById('timer-display').style.display = 'block';
+    
+    afficherMain(); 
+    lancerTimer(25);
+}
+
+function terminerPhaseSpeciale() {
+    phaseSoutienSabotage = false;
+    carteSelectionnee = null;
+    afficherMain();
+    
+    document.getElementById('phase-title').innerText = "⚔️ COMBAT FACE À FACE ⚔️";
+    document.getElementById('instruction-text').innerText = "Que le meilleur gagne !";
+    document.getElementById('timer-display').style.display = 'none';
+    
+    enemyTrain.revealWagons();
 }
