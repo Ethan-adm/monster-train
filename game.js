@@ -2,27 +2,32 @@ let deckDuJoueur = [];
 let mainDuJoueur = [];
 let etapeGare = 1;
 
-// Le circuit exact en "U". x et y sont les coordonnées du centre du rail. r est la rotation.
-const parcoursTrain = [
-    {x: 100, y: 80, r: 180},   // 0: Gare 1 (Loco regarde vers le bas)
-    {x: 100, y: 180, r: 180},  // 1: Gare 2
-    {x: 100, y: 280, r: 180},  // 2: Gare 3
-    {x: 100, y: 380, r: 180},  // 3: Gare 4
-    {x: 100, y: 480, r: 180},  // 4: Gare 5
-    {x: 100, y: 560, r: 180},  // 5: Virage Bas-Gauche
-    {x: 225, y: 560, r: -90},  // 6: Virage Bas-Centre (Loco regarde vers la droite)
-    {x: 350, y: 560, r: 0},    // 7: Virage Bas-Droite (Loco regarde vers le haut)
-    {x: 350, y: 480, r: 0},    // 8: Combat 1 (En bas)
-    {x: 350, y: 380, r: 0},    // 9: Combat 2
-    {x: 350, y: 280, r: 0},    // 10: Combat 3
-    {x: 350, y: 180, r: 0},    // 11: Combat 4
-    {x: 350, y: 80, r: 0},     // 12: Combat 5 (En haut)
-    {x: 350, y: -50, r: 0}     // 13: Sortie de la Loco
-];
+// Système de Chronomètre
+let tempsRestant = 0;
+let intervalTimer = null;
+let enMouvement = false;
 
-let locoPosIndex = 0; // Position actuelle de la loco dans le tableau "parcoursTrain"
-let wagonsEnJeu = []; // Liste des éléments HTML de tes wagons
-let wagonsPositions = []; // Indice de position de chaque wagon dans "parcoursTrain"
+// Coordonnées exactes du circuit rectangulaire (X, Y, Rotation)
+// Le rail est à X: 80 (gauche), X: 360 (droite/centre), Y: 80 (haut), Y: 520 (bas)
+const parcours = {
+    gare1: {x: 220, y: 80, r: 270},   // En haut, regarde vers la gauche
+    coinTL: {x: 80, y: 80, r: 270},   // Coin Haut-Gauche
+    gare2: {x: 80, y: 180, r: 180},   // A gauche, regarde vers le bas
+    gare3: {x: 80, y: 300, r: 180},
+    gare4: {x: 80, y: 420, r: 180},
+    coinBL: {x: 80, y: 520, r: 180},  // Coin Bas-Gauche
+    gare5: {x: 220, y: 520, r: 90},   // En bas, regarde vers la droite
+    coinBR: {x: 360, y: 520, r: 90},  // Coin Bas-Droite
+    combat5: {x: 360, y: 520, r: 0},  // Remonte le centre (regarde vers le haut)
+    combat4: {x: 360, y: 420, r: 0},
+    combat3: {x: 360, y: 320, r: 0},
+    combat2: {x: 360, y: 220, r: 0},
+    combat1: {x: 360, y: 120, r: 0},
+    sortie: {x: 360, y: -50, r: 0}
+};
+
+let positionsTrain = []; // Historique des étapes pour les wagons
+let wagonsEnJeu = [];
 
 function creerDeck() {
     let deck = [];
@@ -48,9 +53,11 @@ function demarrerPartie() {
     // Fait apparaître la loco à la Gare 1
     let loco = document.getElementById('loco');
     loco.style.display = 'flex';
-    placerElementSurRail(loco, locoPosIndex, 30, 30); // 30 = moitié de sa taille pour centrer
+    placerElement(loco, parcours.gare1);
+    positionsTrain.push(parcours.gare1); 
 
     afficherMain();
+    lancerTimer(20); // 20 secondes pour la première gare
 }
 
 function afficherMain() {
@@ -61,86 +68,151 @@ function afficherMain() {
         let divCarte = document.createElement('div');
         divCarte.className = 'carte';
         divCarte.innerText = carte.label;
-        divCarte.onclick = () => jouerCarte(carte.id);
+        divCarte.onclick = () => {
+            if(!enMouvement) jouerCarte(carte.id);
+        };
         handContainer.appendChild(divCarte);
     });
 }
 
-// Centre un élément HTML sur les coordonnées (x,y) du rail
-function placerElementSurRail(element, indexParcours, moitieLargeur, moitieHauteur) {
-    let point = parcoursTrain[indexParcours];
-    element.style.left = (point.x - moitieLargeur) + 'px';
-    element.style.top = (point.y - moitieHauteur) + 'px';
+function placerElement(element, point) {
+    element.style.left = (point.x - 30) + 'px'; // -30 pour centrer (taille 60)
+    element.style.top = (point.y - 30) + 'px';
     element.style.transform = `rotate(${point.r}deg)`;
 }
 
+// --- LOGIQUE DU TIMER ---
+function lancerTimer(secondes) {
+    clearInterval(intervalTimer);
+    tempsRestant = secondes;
+    actualiserAffichageTimer();
+
+    intervalTimer = setInterval(() => {
+        tempsRestant--;
+        actualiserAffichageTimer();
+
+        if (tempsRestant <= 0) {
+            clearInterval(intervalTimer);
+            jouerCarteAleatoire();
+        }
+    }, 1000);
+}
+
+function actualiserAffichageTimer() {
+    let display = document.getElementById('timer-display');
+    display.innerText = `⏳ ${tempsRestant}s`;
+    
+    if (tempsRestant <= 5) {
+        display.classList.add('timer-danger');
+    } else {
+        display.classList.remove('timer-danger');
+    }
+}
+
+function jouerCarteAleatoire() {
+    if (mainDuJoueur.length > 0 && etapeGare <= 5) {
+        let indexAleatoire = Math.floor(Math.random() * mainDuJoueur.length);
+        let carte = mainDuJoueur[indexAleatoire];
+        jouerCarte(carte.id);
+    }
+}
+
+// --- LOGIQUE DE PLACEMENT ET DE DÉPLACEMENT ---
 function jouerCarte(idCarte) {
-    if (etapeGare > 5) return; // Si on a posé 5 wagons, on bloque
+    if (etapeGare > 5 || enMouvement) return;
+    
+    enMouvement = true;
+    clearInterval(intervalTimer); // Stoppe le timer pendant l'animation
 
     let index = mainDuJoueur.findIndex(c => c.id === idCarte);
     let carte = mainDuJoueur[index];
     mainDuJoueur.splice(index, 1);
     afficherMain();
 
-    // 1. Crée un Wagon sur les rails à l'endroit exact où se trouve la Loco
+    // Crée le wagon
     let wagonDiv = document.createElement('div');
     wagonDiv.className = 'wagon-ingame';
     wagonDiv.innerText = carte.label;
     document.getElementById('wagons-layer').appendChild(wagonDiv);
     
-    // Le wagon prend la place actuelle de la loco
-    wagonsEnJeu.push(wagonDiv);
-    wagonsPositions.push(locoPosIndex);
-    placerElementSurRail(wagonDiv, locoPosIndex, 30, 40); // 30x40 = centre d'un wagon de 60x80
+    // Le place sur la loco actuelle
+    placerElement(wagonDiv, positionsTrain[positionsTrain.length - 1]);
+    wagonsEnJeu.unshift(wagonDiv); // Ajoute au début du train
 
-    // 2. La loco avance d'un cran (vers la gare suivante, ou vers le virage si c'est la fin)
-    locoPosIndex++;
-    let loco = document.getElementById('loco');
-    placerElementSurRail(loco, locoPosIndex, 30, 30);
-
-    etapeGare++;
-
-    // 3. Vérifie si le train est complet (5 wagons posés)
-    if (etapeGare > 5) {
-        document.getElementById('instruction-text').innerText = "Attachez vos ceintures...";
-        setTimeout(lancerCinematiqueCombat, 800); // Lance l'animation après un petit délai
-    } else {
-        document.getElementById('instruction-text').innerText = `Sélectionne une carte pour la Gare ${etapeGare} !`;
-    }
+    deplacerVersGareSuivante();
 }
 
-// Anime tout le train (Loco + 5 wagons) pour remonter la voie centrale
+function deplacerVersGareSuivante() {
+    let loco = document.getElementById('loco');
+    let etapesDeplacement = [];
+
+    // Définir le chemin pour aller à la prochaine gare (en passant par les coins)
+    if (etapeGare === 1) etapesDeplacement = [parcours.coinTL, parcours.gare2];
+    if (etapeGare === 2) etapesDeplacement = [parcours.gare3];
+    if (etapeGare === 3) etapesDeplacement = [parcours.gare4];
+    if (etapeGare === 4) etapesDeplacement = [parcours.coinBL, parcours.gare5];
+    
+    let indexEtape = 0;
+
+    function animerPas() {
+        if (indexEtape < etapesDeplacement.length) {
+            let nextPos = etapesDeplacement[indexEtape];
+            positionsTrain.push(nextPos);
+            
+            // Avance la loco
+            placerElement(loco, nextPos);
+            
+            // Avance chaque wagon
+            for(let i=0; i<wagonsEnJeu.length; i++) {
+                placerElement(wagonsEnJeu[i], positionsTrain[positionsTrain.length - 2 - i]);
+            }
+            
+            indexEtape++;
+            setTimeout(animerPas, 300); // 300ms par mouvement
+        } else {
+            // Arrivé à la gare suivante
+            etapeGare++;
+            enMouvement = false;
+            
+            if (etapeGare > 5) {
+                document.getElementById('instruction-text').innerText = "Attachez vos ceintures...";
+                document.getElementById('timer-display').style.display = 'none';
+                setTimeout(lancerCinematiqueCombat, 500);
+            } else {
+                document.getElementById('instruction-text').innerText = `Gare ${etapeGare} : Choisis vite !`;
+                lancerTimer(10); // 10 secondes pour les gares suivantes
+            }
+        }
+    }
+    
+    animerPas();
+}
+
 function lancerCinematiqueCombat() {
     document.getElementById('phase-title').innerText = "⚔️ LE TRAIN ENTRE DANS L'ARÈNE ! ⚔️";
-    document.getElementById('phase-title').style.color = "#e74c3c";
-    
     let loco = document.getElementById('loco');
-    let etapesAnimation = 0;
+    
+    let cheminCombat = [parcours.coinBR, parcours.combat5, parcours.combat4, parcours.combat3, parcours.combat2, parcours.combat1, parcours.sortie];
+    let indexEtape = 0;
 
-    // Le train doit avancer de 8 cases au total pour que le Wagon 1 arrive face à E1
-    let interval = setInterval(() => {
-        etapesAnimation++;
-
-        // La loco avance
-        locoPosIndex++;
-        if(locoPosIndex < parcoursTrain.length) {
-            placerElementSurRail(loco, locoPosIndex, 30, 30);
-        } else {
-            loco.style.opacity = '0'; // La loco sort du plateau par le haut
+    function animerCombat() {
+        if (indexEtape < cheminCombat.length) {
+            let nextPos = cheminCombat[indexEtape];
+            positionsTrain.push(nextPos);
+            
+            placerElement(loco, nextPos);
+            for(let i=0; i<wagonsEnJeu.length; i++) {
+                // S'assure que le wagon ne sort pas de l'écran avec la loco
+                if (positionsTrain.length - 2 - i >= 0) {
+                   let wPos = positionsTrain[positionsTrain.length - 2 - i];
+                   if(wPos !== parcours.sortie) placerElement(wagonsEnJeu[i], wPos);
+                }
+            }
+            
+            indexEtape++;
+            setTimeout(animerCombat, 300);
         }
-
-        // Chaque wagon avance d'un cran en suivant la loco
-        wagonsEnJeu.forEach((wagonDiv, i) => {
-            wagonsPositions[i]++;
-            placerElementSurRail(wagonDiv, wagonsPositions[i], 30, 40);
-        });
-
-        // Quand le train a fait ses 8 pas, l'animation s'arrête
-        if (etapesAnimation >= 8) {
-            clearInterval(interval);
-            document.getElementById('phase-title').innerText = "⚔️ COMBAT FACE À FACE ⚔️";
-            document.getElementById('instruction-text').innerText = "Attente du joueur adverse...";
-        }
-
-    }, 500); // Vitesse du train (1 mouvement toutes les demi-secondes)
+    }
+    
+    animerCombat();
 }
