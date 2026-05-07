@@ -24,7 +24,7 @@ body {
 
 /* Titles */
 h1 {
-    font-family: 'Luckiest Guy', cursive; /* Cartoon/Illustrative Font */
+    font-family: 'Luckiest Guy', cursive;
     color: var(--secondary-teal);
     font-size: 3.5rem;
     text-transform: uppercase;
@@ -49,107 +49,81 @@ h2 {
     padding: 40px;
 }
 
-/* Trainboard and Tracks */
-#train-board {
-    background-color: #34495e;
+/* --- BATTLE ARENA & STATIONS --- */
+#battle-arena {
+    background-color: #2c3e50;
     border: 4px solid var(--secondary-teal);
-    border-radius: 20px;
-    padding: 40px;
+    border-radius: 15px;
+    padding: 20px 40px;
     box-shadow: 0 10px 20px rgba(0,0,0,0.4);
-    position: relative; /* important for tracks and tie placement */
+    width: 800px;
+    max-width: 90vw;
 }
 
-.wagons-container {
-    background-color: transparent;
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    margin-bottom: 20px; /* space for track vis */
-}
-
-/* TrackTie Styling */
-.track-visual {
-    position: absolute;
-    bottom: 30px;
-    left: 20px;
-    right: 20px;
-    height: 10px;
-    background: repeating-linear-gradient(
-        90deg,
-        var(--track-tie-color) 0,
-        var(--track-tie-color) 10px,
-        transparent 10px,
-        transparent 40px
-    );
-    border-radius: 5px;
-}
-
-/* Illustrative Wagon Car with Windows and Label and Wheels */
-.wagon {
-    width: 120px;
-    height: 150px;
-    background-color: var(--primary-red-pink);
-    border: 4px solid #c0392b; /* a darker red border */
-    border-radius: 12px;
-    position: relative;
-    box-shadow: inset 0 0 15px rgba(0,0,0,0.3);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 10px;
-}
-
-.wagon-pane {
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    right: 15px;
-    height: 60px;
-    background-color: var(--pale-teal); /* window color */
-    border: 2px solid var(--accent-yellow);
-    border-radius: 8px;
-    z-index: 1;
-    opacity: 0.8;
-    box-shadow: inset 0 0 5px rgba(241, 196, 15, 0.5);
-}
-
-.wagon-label {
-    position: relative;
-    z-index: 2; /* over pane */
+.tracks-container {
     display: flex;
     flex-direction: column;
+    gap: 15px;
+}
+
+.station-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #34495e;
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 2px dashed #7f8c8d;
+}
+
+/* Emplacements vides pour poser les cartes */
+.wagon-slot {
+    width: 90px;
+    height: 140px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 3px solid #7f8c8d;
+    border-radius: 12px;
+    display: flex;
     justify-content: center;
     align-items: center;
-    color: var(--pale-teal);
+    color: #bdc3c7;
+    font-size: 0.8rem;
     font-weight: bold;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    text-align: center;
 }
 
-.wagon-label span {
-    font-size: 0.9rem;
-    opacity: 0.7;
-    margin-bottom: 2px;
+.player-slot {
+    border-color: var(--light-teal);
 }
 
-.wagon-number {
-    font-size: 1.8rem;
+.enemy-slot {
+    border-color: var(--primary-red-pink);
 }
 
-/* Stylized Wheels */
-.wagon::before, .wagon::after {
-    content: '';
-    position: absolute;
-    bottom: -20px;
-    width: 35px;
-    height: 35px;
-    background-color: #2c3e50;
-    border: 3px solid var(--secondary-teal);
+/* Zone centrale de la gare */
+.station-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.station-number {
+    font-family: 'Luckiest Guy', cursive;
+    color: var(--accent-yellow);
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+}
+
+.vs-badge {
+    background-color: var(--primary-red-pink);
+    color: white;
+    font-weight: bold;
+    padding: 5px 10px;
     border-radius: 50%;
-    z-index: -1;
+    font-size: 1.2rem;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
 }
-
-.wagon::before { left: 15px; }
-.wagon::after { right: 15px; }
 
 /* Player Hand and Cards */
 #player-hand-section h2 {
@@ -165,7 +139,7 @@ h2 {
     padding: 20px;
 }
 
-/* Stylized premium monster card with large number */
+/* Stylized premium monster card */
 .carte {
     width: 90px;
     height: 140px;
