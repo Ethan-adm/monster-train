@@ -114,5 +114,38 @@ input::placeholder {
 }
 
 #join-btn:active {
+
+/* AJOUTER CECI TOUT EN BAS DE TON STYLE.CSS */
+.button-group {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+#create-btn, #join-btn {
+    flex: 1;
+    padding: 15px;
+    color: var(--text-white);
+    font-family: 'Luckiest Guy', cursive;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+#create-btn {
+    background-color: #27ae60;
+}
+#create-btn:hover { background-color: #2ecc71; }
+
+#join-btn {
+    background-color: var(--secondary-teal);
+}
+#join-btn:hover { background-color: var(--light-teal); }
+
+#create-btn:active, #join-btn:active {
+    transform: scale(0.98);
+}
     transform: scale(0.98);
 }
