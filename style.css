@@ -23,25 +23,56 @@ body {
 h1 {
     font-family: 'Luckiest Guy', cursive;
     color: var(--secondary-teal);
-    font-size: 3.5rem;
-    margin-bottom: 10px;
+    font-size: 3rem;
+    margin-bottom: 5px;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+#header-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 800px;
 }
 
 h2 {
     color: var(--light-teal);
     font-size: 1.5rem;
-    margin-bottom: 20px;
+    margin: 0;
+}
+
+/* TIMER */
+#timer-display {
+    font-family: 'Luckiest Guy', cursive;
+    font-size: 2rem;
+    color: var(--accent-yellow);
+    background: rgba(0,0,0,0.3);
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 2px solid var(--accent-yellow);
+    transition: color 0.3s, transform 0.3s;
+}
+
+.timer-danger {
+    color: var(--primary-red-pink) !important;
+    border-color: var(--primary-red-pink) !important;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
 }
 
 .game-area {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
+    gap: 15px;
 }
 
-/* --- LE PLATEAU DE JEU (LE MAP) --- */
+/* --- LE PLATEAU DE JEU --- */
 #board {
     position: relative;
     width: 800px;
@@ -53,40 +84,48 @@ h2 {
     overflow: hidden;
 }
 
-/* Les voies en forme de U */
-.u-track {
+/* Les voies rectangulaires fermées */
+.track-loop {
     position: absolute;
     top: 80px;
-    width: 250px;
-    height: 480px;
-    border-bottom: 8px dashed #7f8c8d;
-    border-radius: 0 0 40px 40px; /* Courbe du virage */
+    width: 280px;
+    height: 440px;
+    border-radius: 20px;
 }
 
 .player-track {
-    left: 100px;
-    border-left: 8px dashed var(--light-teal);
-    border-right: 8px dashed var(--light-teal);
+    left: 80px;
+    border: 6px solid var(--secondary-teal);
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
 }
 
 .enemy-track {
-    left: 450px;
-    border-left: 8px dashed var(--primary-red-pink);
-    border-right: 8px dashed var(--primary-red-pink);
+    left: 440px;
+    border: 6px solid #8e44ad;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
 }
 
-/* Étiquettes et emplacements */
-.gare-label {
+/* Étiquettes et Gares */
+.gare-box {
     position: absolute;
+    width: 60px;
+    height: 40px;
+    background-color: var(--bg-dark-1);
+    border: 2px solid var(--accent-yellow);
     color: var(--accent-yellow);
-    font-family: 'Luckiest Guy', cursive;
-    font-size: 1.2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+    border-radius: 5px;
+    z-index: 5;
 }
 
 .enemy-combat-slot {
     position: absolute;
     width: 60px;
-    height: 80px;
+    height: 60px;
     border: 2px solid var(--primary-red-pink);
     background-color: rgba(231, 76, 60, 0.2);
     border-radius: 8px;
@@ -118,15 +157,15 @@ h2 {
     justify-content: center;
     align-items: center;
     z-index: 100;
-    transition: left 0.5s ease-in-out, top 0.5s ease-in-out, transform 0.5s ease-in-out;
+    transition: left 0.3s linear, top 0.3s linear, transform 0.3s ease-in-out;
     filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.5));
-    display: none; /* Caché avant de piocher */
+    display: none;
 }
 
 .wagon-ingame {
     position: absolute;
-    width: 60px;
-    height: 80px;
+    width: 50px;
+    height: 70px;
     background: var(--card-body-teal-gradient);
     border: 3px solid var(--light-teal);
     border-radius: 8px;
@@ -137,7 +176,7 @@ h2 {
     font-weight: bold;
     font-size: 1.5rem;
     z-index: 50;
-    transition: left 0.5s ease-in-out, top 0.5s ease-in-out, transform 0.5s ease-in-out;
+    transition: left 0.3s linear, top 0.3s linear, transform 0.3s ease-in-out;
     box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
 }
 
@@ -146,8 +185,8 @@ h2 {
     display: flex;
     gap: 10px;
     justify-content: center;
-    min-height: 130px;
-    margin-bottom: 20px;
+    min-height: 120px;
+    margin-bottom: 10px;
 }
 
 .carte {
