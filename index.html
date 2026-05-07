@@ -5,20 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monster Train - Prototype</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Avenir&family=Luckiest+Guy&display=swap" rel="stylesheet">
 </head>
 <body>
     <h1>🚂 Monster Train</h1>
     
     <div class="game-area">
         <div id="train-board">
-            <h2>Tes Wagons</h2>
+            <h2>Train Board</h2>
             <div class="wagons-container">
-                <div class="wagon" id="wagon-1">Wagon 1</div>
-                <div class="wagon" id="wagon-2">Wagon 2</div>
-                <div class="wagon" id="wagon-3">Wagon 3</div>
-                <div class="wagon" id="wagon-4">Wagon 4</div>
-                <div class="wagon" id="wagon-5">Wagon 5</div>
+                <div class="wagon" id="wagon-1">
+                    <div class="wagon-pane"></div>
+                    <div class="wagon-label"><span>Wagon</span> <span class="wagon-number">1</span></div>
+                </div>
+                <div class="wagon" id="wagon-2">
+                    <div class="wagon-pane"></div>
+                    <div class="wagon-label"><span>Wagon</span> <span class="wagon-number">2</span></div>
+                </div>
+                <div class="wagon" id="wagon-3">
+                    <div class="wagon-pane"></div>
+                    <div class="wagon-label"><span>Wagon</span> <span class="wagon-number">3</span></div>
+                </div>
+                <div class="wagon" id="wagon-4">
+                    <div class="wagon-pane"></div>
+                    <div class="wagon-label"><span>Wagon</span> <span class="wagon-number">4</span></div>
+                </div>
+                <div class="wagon" id="wagon-5">
+                    <div class="wagon-pane"></div>
+                    <div class="wagon-label"><span>Wagon</span> <span class="wagon-number">5</span></div>
+                </div>
             </div>
+            <div class="track-visual"></div>
         </div>
 
         <div id="player-hand-section">
