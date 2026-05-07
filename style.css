@@ -8,9 +8,6 @@
     --bg-dark-2: #2c3e50;
     --card-body-teal-gradient: linear-gradient(135deg, #006060 0%, #008080 100%);
     --text-white: #ecf0f1;
-    --text-dark: #2c3e50;
-    --track-tie-color: var(--accent-yellow);
-    --pale-teal: #81ecec;
 }
 
 body {
@@ -22,39 +19,34 @@ body {
     padding: 20px;
 }
 
-/* Titles */
 h1 {
     font-family: 'Luckiest Guy', cursive;
     color: var(--secondary-teal);
     font-size: 3.5rem;
     text-transform: uppercase;
     letter-spacing: 2px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 }
 
 h2 {
     color: var(--light-teal);
-    font-size: 2rem;
-    margin-bottom: 20px;
-    font-weight: bold;
+    font-size: 1.8rem;
+    margin-bottom: 10px;
 }
 
-/* General Layout */
 .game-area {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 60px;
-    padding: 40px;
+    gap: 40px;
 }
 
-/* --- BATTLE ARENA & STATIONS --- */
+/* --- BATTLE ARENA --- */
 #battle-arena {
     background-color: #2c3e50;
     border: 4px solid var(--secondary-teal);
     border-radius: 15px;
-    padding: 20px 40px;
+    padding: 20px 40px 40px 60px; /* Plus d'espace à gauche pour le rail */
     box-shadow: 0 10px 20px rgba(0,0,0,0.4);
     width: 800px;
     max-width: 90vw;
@@ -64,8 +56,37 @@ h2 {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    position: relative; /* CRUCIAL pour que le train se déplace par rapport à ça */
 }
 
+/* LA VOIE FERRÉE ET LE TRAIN */
+.rail-line {
+    position: absolute;
+    left: -40px;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background: repeating-linear-gradient(
+        0deg,
+        #7f8c8d 0,
+        #7f8c8d 10px,
+        transparent 10px,
+        transparent 20px
+    );
+}
+
+#player-train {
+    position: absolute;
+    left: -65px; /* Aligné sur le rail */
+    top: 25px; /* Position de départ (Gare 1) */
+    font-size: 3rem;
+    transition: transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1); /* Animation fluide */
+    z-index: 50;
+    display: none; /* Caché au début */
+    filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.5));
+}
+
+/* Les Gares */
 .station-row {
     display: flex;
     justify-content: space-between;
@@ -74,33 +95,30 @@ h2 {
     padding: 10px 20px;
     border-radius: 10px;
     border: 2px dashed #7f8c8d;
+    transition: all 0.3s ease;
 }
 
-/* Emplacements vides pour poser les cartes */
+/* Illumination de la gare active */
+.active-row {
+    border: 2px solid var(--accent-yellow);
+    box-shadow: 0 0 20px rgba(241, 196, 15, 0.4);
+    background-color: #3b536b;
+}
+
 .wagon-slot {
-    width: 90px;
-    height: 140px;
+    width: 80px;
+    height: 120px;
     background-color: rgba(0, 0, 0, 0.2);
     border: 3px solid #7f8c8d;
     border-radius: 12px;
     display: flex;
     justify-content: center;
     align-items: center;
-    color: #bdc3c7;
-    font-size: 0.8rem;
-    font-weight: bold;
-    text-align: center;
 }
 
-.player-slot {
-    border-color: var(--light-teal);
-}
+.player-slot { border-color: var(--light-teal); }
+.enemy-slot { border-color: var(--primary-red-pink); }
 
-.enemy-slot {
-    border-color: var(--primary-red-pink);
-}
-
-/* Zone centrale de la gare */
 .station-center {
     display: flex;
     flex-direction: column;
@@ -111,8 +129,7 @@ h2 {
 .station-number {
     font-family: 'Luckiest Guy', cursive;
     color: var(--accent-yellow);
-    font-size: 1.5rem;
-    letter-spacing: 1px;
+    font-size: 1.2rem;
 }
 
 .vs-badge {
@@ -121,68 +138,54 @@ h2 {
     font-weight: bold;
     padding: 5px 10px;
     border-radius: 50%;
-    font-size: 1.2rem;
-    box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
 }
 
-/* Player Hand and Cards */
-#player-hand-section h2 {
-    color: var(--secondary-teal);
-}
-
+/* --- LA MAIN ET LES CARTES --- */
 #hand-container {
     display: flex;
-    gap: 15px;
+    gap: 10px;
     justify-content: center;
     min-height: 160px;
     margin-bottom: 20px;
     padding: 20px;
+    flex-wrap: wrap;
 }
 
-/* Stylized premium monster card */
 .carte {
-    width: 90px;
-    height: 140px;
+    width: 80px;
+    height: 120px;
     background: var(--card-body-teal-gradient);
     color: var(--text-white);
-    border: 4px solid var(--accent-yellow);
-    border-radius: 12px;
-    box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
+    border: 3px solid var(--accent-yellow);
+    border-radius: 10px;
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
+    justify-content: center;
     align-items: center;
-    padding: 15px 10px;
+    cursor: pointer;
     transition: transform 0.2s;
-    position: relative;
     font-weight: bold;
 }
 
 .carte:hover {
-    transform: translateY(-5px) scale(1.03);
-    box-shadow: 7px 7px 20px rgba(0,0,0,0.6);
-}
-
-.card-label {
-    font-size: 1rem;
-    color: var(--pale-teal);
-    margin-bottom: 5px;
-    opacity: 0.8;
+    transform: translateY(-10px) scale(1.05);
 }
 
 .card-number {
-    font-size: 3rem;
+    font-size: 2.5rem;
     color: var(--pale-teal);
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-    margin-bottom: 5px;
 }
 
-.card-title {
-    font-size: 1.2rem;
-    margin-top: auto;
+/* Carte une fois placée dans un wagon */
+.carte-jouee {
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 8px;
+    cursor: default;
 }
+.carte-jouee:hover { transform: none; }
 
-/* Buttons */
 button {
     padding: 12px 24px;
     font-family: 'Luckiest Guy', cursive;
@@ -192,10 +195,5 @@ button {
     color: white;
     border: none;
     border-radius: 8px;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-    transition: background-color 0.2s;
 }
-
-button:hover {
-    background-color: #2ecc71;
-}
+button:hover { background-color: #2ecc71; }
