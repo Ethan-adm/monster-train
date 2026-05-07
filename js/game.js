@@ -1,3 +1,83 @@
+// --- GESTION DU RÉSEAU (PeerJS) ---
+const urlParams = new URLSearchParams(window.location.search);
+const roomCode = urlParams.get('room');
+const myPseudo = urlParams.get('pseudo');
+const action = urlParams.get('action');
+
+let peer;
+let networkConn;
+let amIReady = false;
+let isEnemyReady = false;
+
+document.getElementById('my-name').innerText = myPseudo;
+
+// Initialisation du réseau
+if (action === 'create') {
+    // Si on est le Créateur
+    const hostId = 'monster-train-room-' + roomCode;
+    peer = new Peer(hostId);
+    
+    document.getElementById('status-text').innerText = `En attente de l'adversaire... (Code: ${roomCode})`;
+
+    peer.on('connection', (conn) => {
+        networkConn = conn;
+        configurerConnexion();
+    });
+} else {
+    // Si on Rejoint
+    peer = new Peer();
+    
+    peer.on('open', () => {
+        document.getElementById('status-text').innerText = `Recherche du salon ${roomCode}...`;
+        const hostId = 'monster-train-room-' + roomCode;
+        networkConn = peer.connect(hostId);
+        configurerConnexion();
+    });
+}
+
+function configurerConnexion() {
+    networkConn.on('open', () => {
+        document.getElementById('status-text').innerText = "Connexion établie ! Appuie sur Prêt.";
+        document.getElementById('ready-btn').disabled = false;
+    });
+
+    networkConn.on('data', (data) => {
+        if (data.type === 'ready') {
+            isEnemyReady = data.state;
+            let badge = document.getElementById('enemy-ready-status');
+            badge.innerText = isEnemyReady ? "Prêt !" : "Pas Prêt";
+            badge.className = isEnemyReady ? "status-badge ready" : "status-badge not-ready";
+            verifierLancement();
+        }
+    });
+}
+
+function toggleReady() {
+    amIReady = !amIReady;
+    let badge = document.getElementById('my-ready-status');
+    let btn = document.getElementById('ready-btn');
+
+    badge.innerText = amIReady ? "Prêt !" : "Pas Prêt";
+    badge.className = amIReady ? "status-badge ready" : "status-badge not-ready";
+    btn.innerText = amIReady ? "Annuler" : "Je suis Prêt !";
+    btn.style.backgroundColor = amIReady ? "#e74c3c" : "var(--secondary-teal)";
+
+    if (networkConn && networkConn.open) {
+        networkConn.send({ type: 'ready', state: amIReady });
+    }
+    verifierLancement();
+}
+
+function verifierLancement() {
+    if (amIReady && isEnemyReady) {
+        document.getElementById('ready-screen').style.display = 'none';
+        document.getElementById('game-content').style.display = 'block';
+        demarrerPartie(); // Lance ton jeu
+    }
+}
+
+// --- GESTION DU JEU (Ton code existant) ---
+
 let deckDuJoueur = [];
 let mainDuJoueur = [];
 let etapeGare = 1;
@@ -6,7 +86,6 @@ let tempsRestant = 0;
 let intervalTimer = null;
 let enMouvement = false;
 
-// Coordonnées exactes du circuit rectangulaire
 const parcours = {
     gare1: {x: 220, y: 80, r: 270},
     coinTL: {x: 80, y: 80, r: 270},
@@ -45,7 +124,6 @@ function demarrerPartie() {
     deckDuJoueur = melangerDeck(creerDeck());
     mainDuJoueur = deckDuJoueur.splice(0, 8);
     
-    document.getElementById('draw-btn').style.display = 'none';
     document.getElementById('deck-count').innerText = deckDuJoueur.length;
     
     let loco = document.getElementById('loco');
