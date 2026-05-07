@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monster Train - Arène</title>
+    <link rel="stylesheet" href="game-style.css"> <link href="https://fonts.googleapis.com/css2?family=Avenir&family=Luckiest+Guy&display=swap" rel="stylesheet">
+</head>
+<body>
+    <h1>🚂 Monster Train</h1>
+    
+    <div class="game-area">
+        <div id="header-info">
+            <h2 id="phase-title">🚂 Phase de Préparation</h2>
+            <div id="timer-display">⏳ --</div>
+        </div>
+        
+        <div id="board">
+            <div class="track-loop player-track"></div>
+            <div class="track-loop enemy-track"></div>
+
+            <div class="gare-box" style="left: 190px; top: 60px;">Gare 1</div>
+            <div class="gare-box" style="left: 50px; top: 160px;">Gare 2</div>
+            <div class="gare-box" style="left: 50px; top: 280px;">Gare 3</div>
+            <div class="gare-box" style="left: 50px; top: 400px;">Gare 4</div>
+            <div class="gare-box" style="left: 190px; top: 500px;">Gare 5</div>
+
+            <div class="enemy-combat-slot" style="left: 450px; top: 100px;">E1</div>
+            <div class="enemy-combat-slot" style="left: 450px; top: 200px;">E2</div>
+            <div class="enemy-combat-slot" style="left: 450px; top: 300px;">E3</div>
+            <div class="enemy-combat-slot" style="left: 450px; top: 400px;">E4</div>
+            <div class="enemy-combat-slot" style="left: 450px; top: 500px;">E5</div>
+
+            <div class="vs-badge" style="left: 382px; top: 110px;">VS</div>
+            <div class="vs-badge" style="left: 382px; top: 210px;">VS</div>
+            <div class="vs-badge" style="left: 382px; top: 310px;">VS</div>
+            <div class="vs-badge" style="left: 382px; top: 410px;">VS</div>
+            <div class="vs-badge" style="left: 382px; top: 510px;">VS</div>
+
+            <div id="wagons-layer"></div>
+            <div id="loco">🚂</div>
+        </div>
+
+        <div id="player-hand-section">
+            <h3 id="instruction-text">Pioche tes cartes pour commencer ! (<span id="deck-count">60</span> dans le deck)</h3>
+            <div id="hand-container"></div>
+            <button id="draw-btn" onclick="demarrerPartie()">Piocher le 1er tour (8 cartes)</button>
+        </div>
+    </div>
+
+    <script src="js/game.js"></script> </body>
+</html>
