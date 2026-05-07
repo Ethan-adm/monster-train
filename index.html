@@ -11,29 +11,32 @@
     <h1>🚂 Monster Train</h1>
     
     <div class="game-area">
-        <h2 id="phase-title">🚂 Phase de Préparation : Remplis tes wagons !</h2>
+        <div id="header-info">
+            <h2 id="phase-title">🚂 Phase de Préparation</h2>
+            <div id="timer-display">⏳ --</div>
+        </div>
         
         <div id="board">
-            <div class="u-track player-track"></div>
-            <div class="u-track enemy-track"></div>
+            <div class="track-loop player-track"></div>
+            <div class="track-loop enemy-track"></div>
 
-            <div class="gare-label" style="left: 15px; top: 65px;">Gare 1</div>
-            <div class="gare-label" style="left: 15px; top: 165px;">Gare 2</div>
-            <div class="gare-label" style="left: 15px; top: 265px;">Gare 3</div>
-            <div class="gare-label" style="left: 15px; top: 365px;">Gare 4</div>
-            <div class="gare-label" style="left: 15px; top: 465px;">Gare 5</div>
+            <div class="gare-box" style="left: 190px; top: 60px;">Gare 1</div>
+            <div class="gare-box" style="left: 50px; top: 160px;">Gare 2</div>
+            <div class="gare-box" style="left: 50px; top: 280px;">Gare 3</div>
+            <div class="gare-box" style="left: 50px; top: 400px;">Gare 4</div>
+            <div class="gare-box" style="left: 190px; top: 500px;">Gare 5</div>
 
-            <div class="enemy-combat-slot" style="left: 420px; top: 450px;">E1</div>
-            <div class="enemy-combat-slot" style="left: 420px; top: 350px;">E2</div>
-            <div class="enemy-combat-slot" style="left: 420px; top: 250px;">E3</div>
-            <div class="enemy-combat-slot" style="left: 420px; top: 150px;">E4</div>
-            <div class="enemy-combat-slot" style="left: 420px; top: 50px;">E5</div>
+            <div class="enemy-combat-slot" style="left: 450px; top: 100px;">E1</div>
+            <div class="enemy-combat-slot" style="left: 450px; top: 200px;">E2</div>
+            <div class="enemy-combat-slot" style="left: 450px; top: 300px;">E3</div>
+            <div class="enemy-combat-slot" style="left: 450px; top: 400px;">E4</div>
+            <div class="enemy-combat-slot" style="left: 450px; top: 500px;">E5</div>
 
-            <div class="vs-badge" style="left: 382px; top: 465px;">VS</div>
-            <div class="vs-badge" style="left: 382px; top: 365px;">VS</div>
-            <div class="vs-badge" style="left: 382px; top: 265px;">VS</div>
-            <div class="vs-badge" style="left: 382px; top: 165px;">VS</div>
-            <div class="vs-badge" style="left: 382px; top: 65px;">VS</div>
+            <div class="vs-badge" style="left: 382px; top: 110px;">VS</div>
+            <div class="vs-badge" style="left: 382px; top: 210px;">VS</div>
+            <div class="vs-badge" style="left: 382px; top: 310px;">VS</div>
+            <div class="vs-badge" style="left: 382px; top: 410px;">VS</div>
+            <div class="vs-badge" style="left: 382px; top: 510px;">VS</div>
 
             <div id="wagons-layer"></div>
             
