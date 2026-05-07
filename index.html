@@ -11,69 +11,39 @@
     <h1>🚂 Monster Train</h1>
     
     <div class="game-area">
+        <h2 id="phase-title">🚂 Phase de Préparation : Remplis tes wagons !</h2>
         
-        <div id="battle-arena">
-            <h2 id="phase-title">En attente du joueur...</h2>
+        <div id="board">
+            <div class="u-track player-track"></div>
+            <div class="u-track enemy-track"></div>
+
+            <div class="gare-label" style="left: 15px; top: 65px;">Gare 1</div>
+            <div class="gare-label" style="left: 15px; top: 165px;">Gare 2</div>
+            <div class="gare-label" style="left: 15px; top: 265px;">Gare 3</div>
+            <div class="gare-label" style="left: 15px; top: 365px;">Gare 4</div>
+            <div class="gare-label" style="left: 15px; top: 465px;">Gare 5</div>
+
+            <div class="enemy-combat-slot" style="left: 420px; top: 450px;">E1</div>
+            <div class="enemy-combat-slot" style="left: 420px; top: 350px;">E2</div>
+            <div class="enemy-combat-slot" style="left: 420px; top: 250px;">E3</div>
+            <div class="enemy-combat-slot" style="left: 420px; top: 150px;">E4</div>
+            <div class="enemy-combat-slot" style="left: 420px; top: 50px;">E5</div>
+
+            <div class="vs-badge" style="left: 382px; top: 465px;">VS</div>
+            <div class="vs-badge" style="left: 382px; top: 365px;">VS</div>
+            <div class="vs-badge" style="left: 382px; top: 265px;">VS</div>
+            <div class="vs-badge" style="left: 382px; top: 165px;">VS</div>
+            <div class="vs-badge" style="left: 382px; top: 65px;">VS</div>
+
+            <div id="wagons-layer"></div>
             
-            <div class="tracks-container" id="tracks">
-                <div id="player-train">🚂</div>
-
-                <div class="rail-line"></div>
-
-                <div class="station-row" id="row-1">
-                    <div class="wagon-slot player-slot" id="p-slot-1"><span class="slot-text">Vide</span></div>
-                    <div class="station-center">
-                        <div class="station-number">Gare 1</div>
-                        <div class="vs-badge">VS</div>
-                    </div>
-                    <div class="wagon-slot enemy-slot" id="e-slot-1"><span class="slot-text">Ennemi 1</span></div>
-                </div>
-
-                <div class="station-row" id="row-2">
-                    <div class="wagon-slot player-slot" id="p-slot-2"><span class="slot-text">Vide</span></div>
-                    <div class="station-center">
-                        <div class="station-number">Gare 2</div>
-                        <div class="vs-badge">VS</div>
-                    </div>
-                    <div class="wagon-slot enemy-slot" id="e-slot-2"><span class="slot-text">Ennemi 2</span></div>
-                </div>
-
-                <div class="station-row" id="row-3">
-                    <div class="wagon-slot player-slot" id="p-slot-3"><span class="slot-text">Vide</span></div>
-                    <div class="station-center">
-                        <div class="station-number">Gare 3</div>
-                        <div class="vs-badge">VS</div>
-                    </div>
-                    <div class="wagon-slot enemy-slot" id="e-slot-3"><span class="slot-text">Ennemi 3</span></div>
-                </div>
-
-                <div class="station-row" id="row-4">
-                    <div class="wagon-slot player-slot" id="p-slot-4"><span class="slot-text">Vide</span></div>
-                    <div class="station-center">
-                        <div class="station-number">Gare 4</div>
-                        <div class="vs-badge">VS</div>
-                    </div>
-                    <div class="wagon-slot enemy-slot" id="e-slot-4"><span class="slot-text">Ennemi 4</span></div>
-                </div>
-
-                <div class="station-row" id="row-5">
-                    <div class="wagon-slot player-slot" id="p-slot-5"><span class="slot-text">Vide</span></div>
-                    <div class="station-center">
-                        <div class="station-number">Gare 5</div>
-                        <div class="vs-badge">VS</div>
-                    </div>
-                    <div class="wagon-slot enemy-slot" id="e-slot-5"><span class="slot-text">Ennemi 5</span></div>
-                </div>
-
-            </div>
+            <div id="loco">🚂</div>
         </div>
 
         <div id="player-hand-section">
-            <h2 id="instruction-text">Commence la partie en piochant !</h2>
-            <p>(<span id="deck-count">60</span> cartes dans le deck)</p>
-            <div id="hand-container">
-                </div>
-            <button id="draw-btn" onclick="demarrerPartie()">Piocher 8 cartes (Tour 1)</button>
+            <h3 id="instruction-text">Pioche tes cartes pour commencer ! (<span id="deck-count">60</span> dans le deck)</h3>
+            <div id="hand-container"></div>
+            <button id="draw-btn" onclick="demarrerPartie()">Piocher le 1er tour (8 cartes)</button>
         </div>
     </div>
 
