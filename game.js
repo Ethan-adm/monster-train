@@ -5,7 +5,6 @@ let mainDuJoueur = [];
 function creerDeck() {
     let deck = [];
     for (let i = 1; i <= 60; i++) {
-        // split monster number from name for styling
         deck.push({ id: i, nom: `Monster`, label: `${i}` });
     }
     return deck;
