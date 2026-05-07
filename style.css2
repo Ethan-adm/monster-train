@@ -1,0 +1,118 @@
+/* Core Colors and Fonts */
+:root {
+    --bg-dark-1: #1a252f;
+    --bg-dark-2: #2c3e50;
+    --text-white: #ecf0f1;
+    --text-dark: #2c3e50;
+    --light-teal: #40e0d0;
+    --secondary-teal: #008080;
+    --accent-yellow: #f1c40f;
+    --primary-red-pink: #e74c3c;
+}
+
+body {
+    background: linear-gradient(135deg, var(--bg-dark-1) 0%, var(--bg-dark-2) 100%);
+    color: var(--text-white);
+    margin: 0;
+    font-family: 'Avenir', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    text-align: center;
+}
+
+#login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+#login-box {
+    background-color: var(--bg-dark-1);
+    border: 4px solid var(--secondary-teal);
+    border-radius: 15px;
+    padding: 60px 40px;
+    width: 350px;
+    max-width: 90vw;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+h1 {
+    font-family: 'Luckiest Guy', cursive;
+    color: var(--secondary-teal);
+    font-size: 2.5rem;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.subtitle {
+    color: var(--light-teal);
+    font-size: 1rem;
+    margin: -10px 0 20px 0;
+    font-weight: bold;
+}
+
+#back-hub-btn {
+    align-self: flex-start;
+    padding: 8px 16px;
+    background-color: transparent;
+    color: var(--text-white);
+    border: 2px solid var(--text-white);
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+#monster-icon-main {
+    font-size: 4rem;
+    color: var(--secondary-teal);
+    filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.5));
+}
+
+.input-group {
+    width: 100%;
+}
+
+input {
+    width: calc(100% - 30px);
+    padding: 15px;
+    border: 2px solid var(--secondary-teal);
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-white);
+    font-size: 1rem;
+}
+
+input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+#join-btn {
+    width: 100%;
+    padding: 15px;
+    background-color: var(--secondary-teal);
+    color: var(--text-white);
+    font-family: 'Luckiest Guy', cursive;
+    font-size: 1.3rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+#join-btn:hover {
+    background-color: var(--light-teal);
+}
+
+#join-btn:active {
+    transform: scale(0.98);
+}
