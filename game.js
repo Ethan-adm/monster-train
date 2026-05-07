@@ -5,7 +5,8 @@ let mainDuJoueur = [];
 function creerDeck() {
     let deck = [];
     for (let i = 1; i <= 60; i++) {
-        deck.push({ id: i, nom: `Monstre ${i}` });
+        // split monster number from name for styling
+        deck.push({ id: i, nom: `Monster`, label: `${i}` });
     }
     return deck;
 }
@@ -24,17 +25,12 @@ function piocher(nombreDeCartes) {
 
 // Fonction appelée quand on clique sur le bouton
 function demarrerPartie() {
-    // 1. On crée et mélange le deck
     deckDuJoueur = melangerDeck(creerDeck());
-    
-    // 2. On pioche 8 cartes
     mainDuJoueur = piocher(8);
     
-    // 3. On met à jour l'affichage
     afficherMain();
     document.getElementById('deck-count').innerText = deckDuJoueur.length;
     
-    // 4. On cache le bouton pour éviter de repiocher 8 cartes
     document.getElementById('draw-btn').style.display = 'none';
 }
 
@@ -43,10 +39,10 @@ function afficherMain() {
     handContainer.innerHTML = ''; // On vide la main visuelle
 
     mainDuJoueur.forEach(carte => {
-        // On crée un élément HTML pour chaque carte
+        // On crée un élément HTML stylisé pour chaque carte
         let divCarte = document.createElement('div');
         divCarte.className = 'carte';
-        divCarte.innerText = carte.nom;
+        divCarte.innerHTML = `<span class="card-label">#</span><span class="card-number">${carte.label}</span><span class="card-title">${carte.nom}</span>`;
         
         handContainer.appendChild(divCarte);
     });
