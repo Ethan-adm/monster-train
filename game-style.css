@@ -1,3 +1,63 @@
+/* --- L'ÉCRAN PRÊT (OVERLAY) --- */
+#ready-screen {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(26, 37, 47, 0.95);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    color: white;
+}
+
+#ready-title {
+    font-size: 4rem;
+    color: var(--accent-yellow);
+    margin-bottom: 10px;
+}
+
+#status-text {
+    font-size: 1.5rem;
+    color: var(--light-teal);
+    margin-bottom: 40px;
+}
+
+.players-status {
+    display: flex;
+    gap: 50px;
+    margin-bottom: 40px;
+}
+
+.player-box {
+    background: var(--bg-dark-2);
+    border: 3px solid var(--secondary-teal);
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    min-width: 150px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    margin-top: 15px;
+}
+
+.not-ready { background-color: var(--primary-red-pink); }
+.ready { background-color: #27ae60; }
+
+#ready-btn {
+    padding: 15px 40px;
+    font-size: 2rem;
+    background-color: var(--secondary-teal);
+}
+#ready-btn:disabled { background-color: #7f8c8d; cursor: not-allowed; }
+
+/* LE RESTE DE TON CODE GAME-STYLE.CSS EN DESSOUS... */
+
 /* Core Colors and Fonts */
 :root {
     --primary-red-pink: #e74c3c;
