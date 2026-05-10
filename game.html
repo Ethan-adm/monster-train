@@ -9,10 +9,8 @@
     <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
 </head>
 <body>
-    
     <div id="deck-builder-screen">
         <h1 class="deck-title">Création du Deck (<span id="deck-total-count">0</span>/60)</h1>
-        
         <div class="deck-builder-container">
             <div class="catalog-section">
                 <h2>Catalogue par Genre</h2>
@@ -28,7 +26,6 @@
                 </div>
                 <div id="catalog-grid" class="card-grid"></div>
             </div>
-
             <div class="deck-summary-section">
                 <h2>Ton Deck</h2>
                 <div class="limits-info">
@@ -47,16 +44,9 @@
     <div id="ready-screen" style="display: none;">
         <h1 id="ready-title">Préparation du Train...</h1>
         <p id="status-text">Connexion au réseau...</p>
-        
         <div class="players-status">
-            <div class="player-box">
-                <h3 id="my-name">Moi</h3>
-                <span id="my-ready-status" class="status-badge not-ready">Pas Prêt</span>
-            </div>
-            <div class="player-box">
-                <h3 id="enemy-name-ready">Adversaire</h3>
-                <span id="enemy-ready-status" class="status-badge not-ready">Pas Prêt</span>
-            </div>
+            <div class="player-box"><h3 id="my-name">Moi</h3><span id="my-ready-status" class="status-badge not-ready">Pas Prêt</span></div>
+            <div class="player-box"><h3 id="enemy-name-ready">Adversaire</h3><span id="enemy-ready-status" class="status-badge not-ready">Pas Prêt</span></div>
         </div>
         <button id="ready-btn" onclick="toggleReady()" disabled>Je suis Prêt !</button>
     </div>
@@ -64,7 +54,7 @@
     <div id="game-content" style="display: none;">
         <div class="top-bar">
             <h1>🚂 Monster Train - Round <span id="round-number">1</span>/7</h1>
-            <div id="score-display">Toi <span id="my-score">0</span> - <span id="enemy-score">0</span> <span id="enemy-name-score">Adv</span></div>
+            <div id="score-display"><span id="my-name-score">Toi</span> <span id="my-score">0</span> - <span id="enemy-score">0</span> <span id="enemy-name-score">Adv</span></div>
         </div>
         
         <div class="game-area">
@@ -96,37 +86,20 @@
                 <div class="vs-badge" style="left: 382px; top: 510px;">VS</div>
 
                 <div id="wagons-layer"></div>
-                
-                <div id="loco">🚂</div>
-                <div id="enemy-loco">🚂</div>
+                <div id="loco">🚂</div><div id="enemy-loco">🚂</div>
             </div>
 
             <div id="bottom-section">
                 <div id="decks-container">
-                    <div class="deck-pile deck-combat" id="deck-combat">
-                        <span>Combat</span>
-                        <span class="deck-count" id="count-combat">60</span>
-                    </div>
-                    <div class="deck-pile deck-soutien" id="deck-soutien">
-                        <span>Soutien</span>
-                        <span class="deck-count" id="count-soutien">20</span>
-                    </div>
-                    <div class="deck-pile deck-sabotage" id="deck-sabotage">
-                        <span>Sabot.</span>
-                        <span class="deck-count" id="count-sabotage">20</span>
-                    </div>
+                    <div class="deck-pile deck-combat" id="deck-combat"><span>Combat</span><span class="deck-count" id="count-combat">60</span></div>
+                    <div class="deck-pile deck-soutien" id="deck-soutien"><span>Soutien</span><span class="deck-count" id="count-soutien">20</span></div>
+                    <div class="deck-pile deck-sabotage" id="deck-sabotage"><span>Sabot.</span><span class="deck-count" id="count-sabotage">20</span></div>
                 </div>
-
-                <div id="player-hand-section">
-                    <h3 id="instruction-text">Distribution...</h3>
-                    <div id="hand-container"></div>
-                </div>
+                <div id="player-hand-section"><h3 id="instruction-text">Distribution...</h3><div id="hand-container"></div></div>
             </div>
         </div>
     </div>
-
     <div id="animation-layer"></div>
-
     <script src="js/game.js"></script>
 </body>
 </html>
