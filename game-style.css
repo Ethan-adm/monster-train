@@ -1,3 +1,37 @@
+/* --- DECK BUILDER SCREEN --- */
+#deck-builder-screen {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: var(--bg-dark-1); display: flex; flex-direction: column;
+    align-items: center; z-index: 2000; color: white; padding: 20px; overflow-y: auto;
+}
+.deck-builder-container { display: flex; gap: 40px; width: 90%; max-width: 1200px; margin-top: 20px; }
+.catalog-section { flex: 2; background: var(--bg-dark-2); padding: 20px; border-radius: 15px; border: 3px solid var(--secondary-teal); }
+.deck-summary-section { flex: 1; background: var(--bg-dark-2); padding: 20px; border-radius: 15px; border: 3px solid var(--accent-yellow); display: flex; flex-direction: column; }
+.filters { display: flex; gap: 10px; margin-bottom: 20px; }
+.filters button { padding: 8px 15px; font-size: 1rem; }
+.card-grid { display: flex; flex-wrap: wrap; gap: 15px; max-height: 500px; overflow-y: auto; padding-right: 10px; }
+
+/* Mini carte dans le catalogue */
+.catalog-card {
+    width: 90px; height: 120px; background: var(--color-combat); border: 2px solid white; border-radius: 8px;
+    display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer;
+    transition: transform 0.1s; text-align: center; font-size: 0.8rem; font-weight: bold; padding: 5px;
+}
+.catalog-card:hover { transform: scale(1.05); border-color: var(--accent-yellow); }
+.stars { color: var(--accent-yellow); margin-top: 5px; font-size: 0.7rem; }
+
+.limits-info p { margin: 5px 0; font-size: 1.1rem; font-weight: bold; }
+.limit-reached { color: var(--primary-red-pink); }
+.mini-card-list { flex: 1; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px; overflow-y: auto; margin: 15px 0; font-size: 0.9rem; }
+.mini-card-list div { border-bottom: 1px solid #555; padding: 5px 0; }
+
+#validate-deck-btn { padding: 15px; font-size: 1.5rem; width: 100%; background: var(--secondary-teal); }
+#validate-deck-btn:disabled { background: #555; cursor: not-allowed; }
+
+#score-display { font-family: 'Luckiest Guy', cursive; font-size: 1.5rem; color: var(--accent-yellow); margin-bottom: 10px; }
+
+/* LE RESTE DE TON GAME-STYLE.CSS ICI ... (Ready screen, Board, Train etc.) */
+
 /* --- L'ÉCRAN PRÊT --- */
 #ready-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 37, 47, 0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; color: white; }
 #ready-title { font-size: 4rem; color: var(--accent-yellow); margin-bottom: 10px; }
