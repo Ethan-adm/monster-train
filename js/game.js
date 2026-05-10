@@ -5,12 +5,14 @@ const action = urlParams.get('action');
 
 let myScore = 0; let enemyScore = 0; let currentRound = 1;
 let enemyPseudo = "Adversaire";
-let monDeckPersonnalise = [];
-const LIMITES_ETOILES = { 1: 15, 2: 19, 3: 15, 4: 9, 5: 2 };
-let compteurEtoiles = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-const GENRES = ['Humain', 'Dragon', 'Fantasy', 'Dark fantasy', 'Mythologie', 'Légende urbaine', 'Apocalypse', 'Aztec'];
 
-// --- PROBABILITÉS EXACTES DE TON TABLEAU ---
+// --- VERIFICATION DU DECK ---
+let monDeckPersonnalise = [];
+let savedDeck = sessionStorage.getItem('monsterTrainDeck');
+if(savedDeck) { monDeckPersonnalise = JSON.parse(savedDeck); } 
+else { alert("Erreur : Aucun deck trouvé, retour à l'accueil."); window.location.href = "index.html"; }
+
+// --- PROBABILITÉS EXACTES ---
 const PROBAS_ROUND = {
     1: { 1: 0.60, 2: 0.30, 3: 0.10, 4: 0, 5: 0 },
     2: { 1: 0.40, 2: 0.35, 3: 0.25, 4: 0, 5: 0 },
@@ -21,51 +23,24 @@ const PROBAS_ROUND = {
     7: { 1: 0, 2: 0, 3: 0.25, 4: 0.35, 5: 0.40 }
 };
 
-let catalogueComplet = [];
-function genererCatalogue() {
-    GENRES.forEach(g => { for(let e=1; e<=5; e++) catalogueComplet.push({ genre: g, etoiles: e }); });
+function isValidForRound(c) {
+    if (currentRound <= 2) return c.etoiles <= 3;
+    if (currentRound <= 4) return c.etoiles <= 4;
+    return true;
 }
 
-function initDeckBuilder() { genererCatalogue(); filtrerGenre('Humain'); }
-
-function filtrerGenre(genre) {
-    const grid = document.getElementById('catalog-grid'); grid.innerHTML = '';
-    catalogueComplet.filter(c => c.genre === genre).forEach(carte => {
-        let div = document.createElement('div'); div.className = 'catalog-card';
-        div.innerHTML = `<span>${carte.genre}</span><span class="stars">${'⭐'.repeat(carte.etoiles)}</span>`;
-        div.onclick = () => ajouterAuDeck(carte); grid.appendChild(div);
-    });
-}
-
-function ajouterAuDeck(carte) {
-    if (monDeckPersonnalise.length >= 60) return alert("Deck complet !");
-    if (compteurEtoiles[carte.etoiles] >= LIMITES_ETOILES[carte.etoiles]) return;
-    monDeckPersonnalise.push({ ...carte, id: `C${Math.random()}`, type: 'combat' });
-    compteurEtoiles[carte.etoiles]++; actualiserUIBuilder();
-}
-
-function actualiserUIBuilder() {
-    document.getElementById('deck-total-count').innerText = monDeckPersonnalise.length;
-    for(let i=1; i<=5; i++) {
-        document.getElementById(`count-${i}star`).innerText = compteurEtoiles[i];
-        if (compteurEtoiles[i] === LIMITES_ETOILES[i]) document.getElementById(`p-limit-${i}`).classList.add('limit-reached');
+// Algorithme de mélange propre
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
     }
-    let list = document.getElementById('my-deck-list'); list.innerHTML = '';
-    monDeckPersonnalise.forEach(c => { list.innerHTML += `<div><span>${c.genre}</span> <span>${'⭐'.repeat(c.etoiles)}</span></div>`; });
-    let btn = document.getElementById('validate-deck-btn'); btn.innerText = `Valider (${monDeckPersonnalise.length}/60)`;
-    btn.disabled = monDeckPersonnalise.length < 60;
+    return array;
 }
-
-function validerDeck() {
-    document.getElementById('deck-builder-screen').style.display = 'none';
-    document.getElementById('ready-screen').style.display = 'flex';
-    initReseau();
-}
-window.onload = initDeckBuilder;
 
 // --- RESEAU ---
 let peer; let networkConn; let amIReady = false; let isEnemyReady = false;
-let isEnemyReadyForCombat = false; // Barrière de synchro finale
+let isEnemyReadyForCombat = false; 
 
 function initReseau() {
     document.getElementById('my-name').innerText = myPseudo; document.getElementById('my-name-score').innerText = myPseudo;
@@ -95,10 +70,8 @@ function configurerConnexion() {
         } else if (data.type === 'card_played') {
             enemyTrain.addWagon(data.carteObj, true, 'combat', data.etape); 
         } else if (data.type === 'special_played') {
-            // Reçu de l'ennemi = badge complètement CACHÉ
             ajouterBadgeSoutienSabotage(false, data.index, data.carteObj, true);
         } else if (data.type === 'ready_for_combat') {
-            // BARRIÈRE DE SYNCHRO : L'ennemi a fini ses 25s
             isEnemyReadyForCombat = true;
             verifierSiLesDeuxSontPretsPourCombat();
         }
@@ -121,12 +94,13 @@ function verifierLancement() {
         demarrerRound();
     }
 }
+window.onload = initReseau;
 
 // --- JEU ---
 let deckCombat = []; let deckSoutien = []; let deckSabotage = []; let mainDuJoueur = [];
 let etapeGare = 1; let phaseSoutienSabotage = false; let carteSelectionnee = null;
 let carteDejaJoueePourCettePhase = false; let tempsTotalPhase = 0; let tempsRestant = 0; let intervalTimer = null;
-let amIReadyForCombat = false; // Ma barrière de synchro
+let amIReadyForCombat = false; 
 
 const parcours = { gare1: {x: 220, y: 80, r: 270}, coinTL: {x: 80, y: 80, r: 270}, gare2: {x: 80, y: 180, r: 180}, gare3: {x: 80, y: 300, r: 180}, gare4: {x: 80, y: 420, r: 180}, coinBL: {x: 80, y: 520, r: 180}, gare5: {x: 220, y: 520, r: 90}, coinBR: {x: 360, y: 520, r: 90}, combat5: {x: 360, y: 520, r: 0}, combat4: {x: 360, y: 420, r: 0}, combat3: {x: 360, y: 320, r: 0}, combat2: {x: 360, y: 220, r: 0}, combat1: {x: 360, y: 120, r: 0}, sortie: {x: 360, y: -100, r: 0} };
 const enemyParcours = { gare1: {x: 580, y: 80, r: 90}, coinTL: {x: 720, y: 80, r: 90}, gare2: {x: 720, y: 180, r: 180}, gare3: {x: 720, y: 300, r: 180}, gare4: {x: 720, y: 420, r: 180}, coinBL: {x: 720, y: 520, r: 180}, gare5: {x: 580, y: 520, r: 270}, coinBR: {x: 440, y: 520, r: 270}, combat5: {x: 440, y: 520, r: 0}, combat4: {x: 440, y: 420, r: 0}, combat3: {x: 440, y: 320, r: 0}, combat2: {x: 440, y: 220, r: 0}, combat1: {x: 440, y: 120, r: 0}, sortie: {x: 440, y: -100, r: 0} };
@@ -134,16 +108,7 @@ const enemyParcours = { gare1: {x: 580, y: 80, r: 90}, coinTL: {x: 720, y: 80, r
 function placerElement(element, point, isLoco = false) { 
     element.style.left = (point.x - 30) + 'px'; element.style.top = (point.y - 30) + 'px'; 
     if(isLoco) element.style.transform = `rotate(${point.r}deg)`; 
-    else element.style.transform = `rotate(0deg)`; // CARTES TOUJOURS DROITES
-}
-
-// Algorithme de mélange propre
-function shuffle(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
+    else element.style.transform = `rotate(0deg)`; // CARTES DROITES
 }
 
 class TrainController {
@@ -168,23 +133,16 @@ class TrainController {
     
     revealWagons() { 
         this.wagons.forEach(w => { 
-            if (w.dataset.realGenre) { 
-                w.innerHTML = `<span class="card-genre">${w.dataset.realGenre}</span><span class="card-stars">${'⭐'.repeat(w.dataset.realEtoiles)}</span>`; w.className = `wagon-ingame type-${w.dataset.realType} reveal-anim`; w.dataset.stars = w.dataset.realEtoiles; 
-            } 
+            if (w.dataset.realGenre) { w.innerHTML = `<span class="card-genre">${w.dataset.realGenre}</span><span class="card-stars">${'⭐'.repeat(w.dataset.realEtoiles)}</span>`; w.className = `wagon-ingame type-${w.dataset.realType} reveal-anim`; w.dataset.stars = w.dataset.realEtoiles; } 
             w.querySelectorAll('.badge-hidden').forEach(b => { b.classList.remove('badge-hidden'); w.dataset.badgeMod = b.classList.contains('badge-soutien') ? 1 : -1; });
         }); 
     }
-    clearBoard() { this.loco.style.display = 'none'; this.wagons.forEach(w => w.remove()); this.wagons = []; this.history = []; this.targetSteps = []; }
+    clearBoard() { this.loco.style.display = 'none'; this.loco.style.opacity = 1; this.wagons.forEach(w => w.remove()); this.wagons = []; this.history = []; this.targetSteps = []; }
     
     driveOff() {
         this.history.push(this.path.sortie);
-        this.loco.style.transition = "all 2s ease-in-out";
-        placerElement(this.loco, this.path.sortie, true);
         this.wagons.forEach((w, i) => {
-            if(!w.classList.contains('faint')){ // Seulement les survivants avancent
-                w.style.transition = "all 2s ease-in-out";
-                placerElement(w, this.path.sortie);
-            }
+            if(!w.classList.contains('faint')){ w.style.transition = "all 2s ease-in-out"; placerElement(w, this.path.sortie); }
         });
     }
 }
@@ -195,52 +153,61 @@ function demarrerRound() {
     if (currentRound > 7) return alert("Fin de la partie !");
     document.getElementById('round-number').innerText = currentRound;
     
-    // Reset flags
     amIReadyForCombat = false; isEnemyReadyForCombat = false;
     
     if(currentRound === 1) {
-        deckCombat = shuffle([...monDeckPersonnalise]); // Mélange aléatoire propre
+        deckCombat = shuffle([...monDeckPersonnalise]); 
         deckSoutien = []; for(let i=1; i<=20; i++) deckSoutien.push({ id: `S${i}`, label: `S`, type: 'soutien' });
         deckSabotage = []; for(let i=1; i<=20; i++) deckSabotage.push({ id: `X${i}`, label: `X`, type: 'sabotage' });
     }
     if(playerTrain) playerTrain.clearBoard(); if(enemyTrain) enemyTrain.clearBoard();
     playerTrain = new TrainController(true); enemyTrain = new TrainController(false);
     
-    let nbCartes = currentRound === 1 ? 8 : 4;
-    if (currentRound === 3 && myScore === 2 && enemyScore === 0) nbCartes = 6;
-    animerDistribution(nbCartes);
+    // CALCUL DE LA LIMITE DE MAIN
+    let handLimit = 7;
+    if (currentRound === 1) handLimit = 8;
+    if (currentRound === 3 && myScore === 2 && enemyScore === 0) handLimit = 6;
+    
+    let currentCombatInHand = mainDuJoueur.filter(c => c.type === 'combat').length;
+    let nbCartesAPiocher = handLimit - currentCombatInHand;
+    if(nbCartesAPiocher < 0) nbCartesAPiocher = 0;
+
+    animerDistribution(nbCartesAPiocher);
 }
 
-// LOGIQUE EXACTE DES PROBABILITES
 function piocherCartesCombatAvecProbas(nbAPiocher) {
     let tirage = [];
     let weights = PROBAS_ROUND[currentRound > 7 ? 7 : currentRound];
     let toDraw = {1:0, 2:0, 3:0, 4:0, 5:0};
     
-    // Calcul de la répartition exacte selon les % et le nb de cartes à piocher
     let remaining = nbAPiocher;
     for(let stars=1; stars<=5; stars++) {
         let count = Math.floor(nbAPiocher * (weights[stars] || 0));
-        toDraw[stars] = count;
-        remaining -= count;
+        toDraw[stars] = count; remaining -= count;
     }
-    // S'il reste une carte (arrondi), on donne au plus gros pourcentage
     if(remaining > 0) {
         let highestStar = 1; let highestW = 0;
         for(let s=1; s<=5; s++) { if(weights[s] > highestW) { highestW = weights[s]; highestStar = s; } }
-        toDraw[highestStar]++;
+        toDraw[highestStar] += remaining;
     }
 
-    // On pioche physiquement dans le deck selon ces quotas
     for(let stars=1; stars<=5; stars++) {
         let count = toDraw[stars];
         while(count > 0) {
-            let index = deckCombat.findIndex(c => c.etoiles == stars);
+            let index = deckCombat.findIndex(c => c.etoiles === stars);
             if(index !== -1) { tirage.push(deckCombat.splice(index, 1)[0]); }
             count--;
         }
     }
-    return shuffle(tirage); // Mélange le résultat de la pioche
+
+    // FALLBACK : Si le deck n'a plus les bonnes étoiles exigées, on pioche les cartes valides restantes
+    while(tirage.length < nbAPiocher && deckCombat.length > 0) {
+        let validIndex = deckCombat.findIndex(c => isValidForRound(c));
+        if(validIndex !== -1) tirage.push(deckCombat.splice(validIndex, 1)[0]);
+        else tirage.push(deckCombat.splice(0, 1)[0]); // Au pire, n'importe laquelle pour ne pas bloquer
+    }
+
+    return shuffle(tirage);
 }
 
 async function animerDistribution(nbCombat) {
@@ -282,8 +249,7 @@ function clicSurWagon(isTrainJoueur, numGare) { if (!phaseSoutienSabotage || !ca
 
 function placerCarteSpeciale(isTrainJoueur, numGare, carte) { 
     let index = mainDuJoueur.findIndex(c => c.id === carte.id); mainDuJoueur.splice(index, 1); carteSelectionnee = null; afficherMain(); 
-    // MOI je le vois : forceHidden = false
-    ajouterBadgeSoutienSabotage(true, numGare, carte, false); 
+    ajouterBadgeSoutienSabotage(true, numGare, carte, false); // Moi je le vois !
     if (networkConn && networkConn.open) networkConn.send({ type: 'special_played', isTrainJoueur: isTrainJoueur, index: numGare, carteObj: carte }); 
 }
 
@@ -293,7 +259,7 @@ function ajouterBadgeSoutienSabotage(isLocalPlayer, numGare, carte, forceHidden)
     let wagonDiv = train.wagons.find(w => w.dataset.gare == numGare); if (!wagonDiv) return; 
     let badge = document.createElement('div'); 
     badge.className = `badge-${carte.type}`;
-    if (forceHidden) badge.classList.add('badge-hidden'); // L'ENNEMI NE VOIT RIEN
+    if (forceHidden) badge.classList.add('badge-hidden'); // L'ENNEMI NE VOIT RIEN AVANT REVEAL
     badge.innerText = carte.label; wagonDiv.appendChild(badge); 
 }
 
@@ -304,11 +270,10 @@ function lancerTimer(sec) {
     intervalTimer = setInterval(() => { 
         tempsRestant--; actualiserAffichageTimer(); 
         if (tempsRestant <= 0) { 
-            clearInterval(intervalTimer); // ARRÊTE NET LE COMPTEUR
+            clearInterval(intervalTimer); 
             if (phaseSoutienSabotage) { terminerPhaseSpeciale(); } 
             else { 
                 if (!carteDejaJoueePourCettePhase) jouerCarteAleatoire(); 
-                // Pour éviter le spam d'AFK, on attend 1s proprement.
                 setTimeout(() => { lancerPhase(etapeGare + 1); }, 1000); 
             } 
         } 
@@ -322,7 +287,10 @@ function lancerCinematiqueCombat() {
     document.getElementById('phase-title').innerText = "⚔️ LE TRAIN ENTRE DANS L'ARÈNE ! ⚔️";
     playerTrain.moveToStation(6, 4000); enemyTrain.moveToStation(6, 4000);
     setTimeout(() => {
-        placerElement(playerTrain.loco, parcours.combat1, true); placerElement(enemyTrain.loco, enemyParcours.combat1, true);
+        // ON CACHE LA LOCO TOTALEMENT POUR NE PAS BLOQUER LA GARE 5
+        placerElement(playerTrain.loco, parcours.sortie, true); playerTrain.loco.style.opacity = 0; 
+        placerElement(enemyTrain.loco, enemyParcours.sortie, true); enemyTrain.loco.style.opacity = 0;
+
         playerTrain.wagons.forEach(w => placerElement(w, parcours[`combat${w.dataset.gare}`]));
         enemyTrain.wagons.forEach(w => placerElement(w, enemyParcours[`combat${w.dataset.gare}`]));
         demarrerPhaseSoutienSabotage();
@@ -353,7 +321,7 @@ function verifierSiLesDeuxSontPretsPourCombat() {
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function resoudreCombats() {
     let pSurivants = 0; let eSurivants = 0;
-    // Combat de Gare 5 à Gare 1 (Bas vers Haut de l'écran)
+    // Combat de Gare 5 à Gare 1 (Bas vers Haut)
     for(let i=5; i>=1; i--) {
         let pW = playerTrain.wagons.find(w => w.dataset.gare == i); let eW = enemyTrain.wagons.find(w => w.dataset.gare == i);
         if(!pW || !eW) continue;
@@ -375,7 +343,6 @@ async function resoudreCombats() {
     document.getElementById('my-score').innerText = myScore; document.getElementById('enemy-score').innerText = enemyScore;
     
     await sleep(2000);
-    // Le train quitte l'écran avec les survivants !
     playerTrain.driveOff(); enemyTrain.driveOff();
     await sleep(2000);
     currentRound++; demarrerRound(); 
