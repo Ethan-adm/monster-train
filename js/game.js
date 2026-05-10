@@ -10,14 +10,23 @@ const LIMITES_ETOILES = { 1: 15, 2: 19, 3: 15, 4: 9, 5: 2 };
 let compteurEtoiles = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
 const GENRES = ['Humain', 'Dragon', 'Fantasy', 'Dark fantasy', 'Mythologie', 'Légende urbaine', 'Apocalypse', 'Aztec'];
 
+// --- PROBABILITÉS EXACTES DE TON TABLEAU ---
+const PROBAS_ROUND = {
+    1: { 1: 0.60, 2: 0.30, 3: 0.10, 4: 0, 5: 0 },
+    2: { 1: 0.40, 2: 0.35, 3: 0.25, 4: 0, 5: 0 },
+    3: { 1: 0.20, 2: 0.40, 3: 0.30, 4: 0.10, 5: 0 },
+    4: { 1: 0.10, 2: 0.25, 3: 0.40, 4: 0.25, 5: 0 },
+    5: { 1: 0, 2: 0.20, 3: 0.35, 4: 0.35, 5: 0.10 },
+    6: { 1: 0, 2: 0, 3: 0.30, 4: 0.45, 5: 0.25 },
+    7: { 1: 0, 2: 0, 3: 0.25, 4: 0.35, 5: 0.40 }
+};
+
 let catalogueComplet = [];
 function genererCatalogue() {
     GENRES.forEach(g => { for(let e=1; e<=5; e++) catalogueComplet.push({ genre: g, etoiles: e }); });
 }
 
-function initDeckBuilder() {
-    genererCatalogue(); filtrerGenre('Humain');
-}
+function initDeckBuilder() { genererCatalogue(); filtrerGenre('Humain'); }
 
 function filtrerGenre(genre) {
     const grid = document.getElementById('catalog-grid'); grid.innerHTML = '';
@@ -29,7 +38,7 @@ function filtrerGenre(genre) {
 }
 
 function ajouterAuDeck(carte) {
-    if (monDeckPersonnalise.length >= 60) return alert("Deck complet ! (60/60)");
+    if (monDeckPersonnalise.length >= 60) return alert("Deck complet !");
     if (compteurEtoiles[carte.etoiles] >= LIMITES_ETOILES[carte.etoiles]) return;
     monDeckPersonnalise.push({ ...carte, id: `C${Math.random()}`, type: 'combat' });
     compteurEtoiles[carte.etoiles]++; actualiserUIBuilder();
@@ -56,10 +65,10 @@ window.onload = initDeckBuilder;
 
 // --- RESEAU ---
 let peer; let networkConn; let amIReady = false; let isEnemyReady = false;
+let isEnemyReadyForCombat = false; // Barrière de synchro finale
 
 function initReseau() {
-    document.getElementById('my-name').innerText = myPseudo;
-    document.getElementById('my-name-score').innerText = myPseudo;
+    document.getElementById('my-name').innerText = myPseudo; document.getElementById('my-name-score').innerText = myPseudo;
     if (action === 'create') {
         peer = new Peer('monster-train-room-' + roomCode);
         peer.on('connection', (conn) => { networkConn = conn; configurerConnexion(); });
@@ -86,8 +95,12 @@ function configurerConnexion() {
         } else if (data.type === 'card_played') {
             enemyTrain.addWagon(data.carteObj, true, 'combat', data.etape); 
         } else if (data.type === 'special_played') {
-            // L'ennemi place un badge (stocké invisible)
-            ajouterBadgeSoutienSabotage(false, data.index, data.carteObj);
+            // Reçu de l'ennemi = badge complètement CACHÉ
+            ajouterBadgeSoutienSabotage(false, data.index, data.carteObj, true);
+        } else if (data.type === 'ready_for_combat') {
+            // BARRIÈRE DE SYNCHRO : L'ennemi a fini ses 25s
+            isEnemyReadyForCombat = true;
+            verifierSiLesDeuxSontPretsPourCombat();
         }
     });
 }
@@ -113,17 +126,18 @@ function verifierLancement() {
 let deckCombat = []; let deckSoutien = []; let deckSabotage = []; let mainDuJoueur = [];
 let etapeGare = 1; let phaseSoutienSabotage = false; let carteSelectionnee = null;
 let carteDejaJoueePourCettePhase = false; let tempsTotalPhase = 0; let tempsRestant = 0; let intervalTimer = null;
+let amIReadyForCombat = false; // Ma barrière de synchro
 
-const parcours = { gare1: {x: 220, y: 80, r: 270}, coinTL: {x: 80, y: 80, r: 270}, gare2: {x: 80, y: 180, r: 180}, gare3: {x: 80, y: 300, r: 180}, gare4: {x: 80, y: 420, r: 180}, coinBL: {x: 80, y: 520, r: 180}, gare5: {x: 220, y: 520, r: 90}, coinBR: {x: 360, y: 520, r: 90}, combat5: {x: 360, y: 520, r: 0}, combat4: {x: 360, y: 420, r: 0}, combat3: {x: 360, y: 320, r: 0}, combat2: {x: 360, y: 220, r: 0}, combat1: {x: 360, y: 120, r: 0}, sortie: {x: 360, y: -80, r: 0} };
-const enemyParcours = { gare1: {x: 580, y: 80, r: 90}, coinTL: {x: 720, y: 80, r: 90}, gare2: {x: 720, y: 180, r: 180}, gare3: {x: 720, y: 300, r: 180}, gare4: {x: 720, y: 420, r: 180}, coinBL: {x: 720, y: 520, r: 180}, gare5: {x: 580, y: 520, r: 270}, coinBR: {x: 440, y: 520, r: 270}, combat5: {x: 440, y: 520, r: 0}, combat4: {x: 440, y: 420, r: 0}, combat3: {x: 440, y: 320, r: 0}, combat2: {x: 440, y: 220, r: 0}, combat1: {x: 440, y: 120, r: 0}, sortie: {x: 440, y: -80, r: 0} };
+const parcours = { gare1: {x: 220, y: 80, r: 270}, coinTL: {x: 80, y: 80, r: 270}, gare2: {x: 80, y: 180, r: 180}, gare3: {x: 80, y: 300, r: 180}, gare4: {x: 80, y: 420, r: 180}, coinBL: {x: 80, y: 520, r: 180}, gare5: {x: 220, y: 520, r: 90}, coinBR: {x: 360, y: 520, r: 90}, combat5: {x: 360, y: 520, r: 0}, combat4: {x: 360, y: 420, r: 0}, combat3: {x: 360, y: 320, r: 0}, combat2: {x: 360, y: 220, r: 0}, combat1: {x: 360, y: 120, r: 0}, sortie: {x: 360, y: -100, r: 0} };
+const enemyParcours = { gare1: {x: 580, y: 80, r: 90}, coinTL: {x: 720, y: 80, r: 90}, gare2: {x: 720, y: 180, r: 180}, gare3: {x: 720, y: 300, r: 180}, gare4: {x: 720, y: 420, r: 180}, coinBL: {x: 720, y: 520, r: 180}, gare5: {x: 580, y: 520, r: 270}, coinBR: {x: 440, y: 520, r: 270}, combat5: {x: 440, y: 520, r: 0}, combat4: {x: 440, y: 420, r: 0}, combat3: {x: 440, y: 320, r: 0}, combat2: {x: 440, y: 220, r: 0}, combat1: {x: 440, y: 120, r: 0}, sortie: {x: 440, y: -100, r: 0} };
 
 function placerElement(element, point, isLoco = false) { 
     element.style.left = (point.x - 30) + 'px'; element.style.top = (point.y - 30) + 'px'; 
     if(isLoco) element.style.transform = `rotate(${point.r}deg)`; 
-    else element.style.transform = `rotate(0deg)`; // Garde les cartes droites !
+    else element.style.transform = `rotate(0deg)`; // CARTES TOUJOURS DROITES
 }
 
-// Mélange parfait Fisher-Yates
+// Algorithme de mélange propre
 function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -147,7 +161,7 @@ class TrainController {
         } 
         document.getElementById('wagons-layer').appendChild(wagonDiv); 
         placerElement(wagonDiv, this.history[this.history.length - 1]); 
-        this.wagons.push(wagonDiv); // On garde l'ordre Gare 1 -> 5
+        this.wagons.push(wagonDiv); 
     }
     moveToStation(stationNum, timeMs) { let etapes = []; if (stationNum === 2) etapes = [this.path.coinTL, this.path.gare2]; else if (stationNum === 3) etapes = [this.path.gare3]; else if (stationNum === 4) etapes = [this.path.gare4]; else if (stationNum === 5) etapes = [this.path.coinBL, this.path.gare5]; else if (stationNum === 6) etapes = [this.path.coinBR, this.path.combat5, this.path.combat4, this.path.combat3, this.path.combat2, this.path.combat1]; this.targetSteps = etapes; this.executeSteps(timeMs / etapes.length); }
     executeSteps(timePerStep) { if (this.targetSteps.length === 0) return; let nextPos = this.targetSteps.shift(); this.history.push(nextPos); this.loco.style.transition = `all ${timePerStep}ms linear`; placerElement(this.loco, nextPos, true); this.wagons.forEach((w, i) => { w.style.transition = `all ${timePerStep}ms linear`; let wPos = this.history[this.history.length - 1 - this.wagons.length + i]; if(wPos) placerElement(w, wPos); }); this.timeoutId = setTimeout(() => { this.executeSteps(timePerStep); }, timePerStep); }
@@ -166,12 +180,10 @@ class TrainController {
         this.history.push(this.path.sortie);
         this.loco.style.transition = "all 2s ease-in-out";
         placerElement(this.loco, this.path.sortie, true);
-        this.loco.style.opacity = 0;
         this.wagons.forEach((w, i) => {
-            if(!w.classList.contains('faint')){ // Seulement les survivants
+            if(!w.classList.contains('faint')){ // Seulement les survivants avancent
                 w.style.transition = "all 2s ease-in-out";
                 placerElement(w, this.path.sortie);
-                w.style.opacity = 0;
             }
         });
     }
@@ -183,8 +195,11 @@ function demarrerRound() {
     if (currentRound > 7) return alert("Fin de la partie !");
     document.getElementById('round-number').innerText = currentRound;
     
+    // Reset flags
+    amIReadyForCombat = false; isEnemyReadyForCombat = false;
+    
     if(currentRound === 1) {
-        deckCombat = shuffle([...monDeckPersonnalise]);
+        deckCombat = shuffle([...monDeckPersonnalise]); // Mélange aléatoire propre
         deckSoutien = []; for(let i=1; i<=20; i++) deckSoutien.push({ id: `S${i}`, label: `S`, type: 'soutien' });
         deckSabotage = []; for(let i=1; i<=20; i++) deckSabotage.push({ id: `X${i}`, label: `X`, type: 'sabotage' });
     }
@@ -196,19 +211,40 @@ function demarrerRound() {
     animerDistribution(nbCartes);
 }
 
-// Filtre les cartes 4 et 5 étoiles selon le round
-function isValidForRound(c) {
-    if (currentRound <= 2) return c.etoiles <= 3;
-    if (currentRound <= 4) return c.etoiles <= 4;
-    return true;
+// LOGIQUE EXACTE DES PROBABILITES
+function piocherCartesCombatAvecProbas(nbAPiocher) {
+    let tirage = [];
+    let weights = PROBAS_ROUND[currentRound > 7 ? 7 : currentRound];
+    let toDraw = {1:0, 2:0, 3:0, 4:0, 5:0};
+    
+    // Calcul de la répartition exacte selon les % et le nb de cartes à piocher
+    let remaining = nbAPiocher;
+    for(let stars=1; stars<=5; stars++) {
+        let count = Math.floor(nbAPiocher * (weights[stars] || 0));
+        toDraw[stars] = count;
+        remaining -= count;
+    }
+    // S'il reste une carte (arrondi), on donne au plus gros pourcentage
+    if(remaining > 0) {
+        let highestStar = 1; let highestW = 0;
+        for(let s=1; s<=5; s++) { if(weights[s] > highestW) { highestW = weights[s]; highestStar = s; } }
+        toDraw[highestStar]++;
+    }
+
+    // On pioche physiquement dans le deck selon ces quotas
+    for(let stars=1; stars<=5; stars++) {
+        let count = toDraw[stars];
+        while(count > 0) {
+            let index = deckCombat.findIndex(c => c.etoiles == stars);
+            if(index !== -1) { tirage.push(deckCombat.splice(index, 1)[0]); }
+            count--;
+        }
+    }
+    return shuffle(tirage); // Mélange le résultat de la pioche
 }
 
 async function animerDistribution(nbCombat) {
-    let piocheCombat = [];
-    // Pioche intelligemment en sautant les cartes bloquées
-    for(let i=0; i<deckCombat.length && piocheCombat.length < nbCombat; i++) {
-        if(isValidForRound(deckCombat[i])) { piocheCombat.push(deckCombat.splice(i, 1)[0]); i--; }
-    }
+    let piocheCombat = piocherCartesCombatAvecProbas(nbCombat);
     let cartesAPiocher = [...piocheCombat, ...deckSoutien.splice(0, currentRound===1?3:0), ...deckSabotage.splice(0, currentRound===1?3:0)];
     document.getElementById('count-combat').innerText = deckCombat.length;
     for (let i = 0; i < cartesAPiocher.length; i++) {
@@ -246,24 +282,39 @@ function clicSurWagon(isTrainJoueur, numGare) { if (!phaseSoutienSabotage || !ca
 
 function placerCarteSpeciale(isTrainJoueur, numGare, carte) { 
     let index = mainDuJoueur.findIndex(c => c.id === carte.id); mainDuJoueur.splice(index, 1); carteSelectionnee = null; afficherMain(); 
-    ajouterBadgeSoutienSabotage(true, numGare, carte); // C'est NOUS qui le posons, on le cache pour nous même avant le reveal ? Non, on se le cache pour l'ennemi. On cache tout visuellement !
+    // MOI je le vois : forceHidden = false
+    ajouterBadgeSoutienSabotage(true, numGare, carte, false); 
     if (networkConn && networkConn.open) networkConn.send({ type: 'special_played', isTrainJoueur: isTrainJoueur, index: numGare, carteObj: carte }); 
 }
 
-function ajouterBadgeSoutienSabotage(isLocalPlayer, numGare, carte) { 
-    // isLocalPlayer = "Est-ce moi qui l'ai joué ?" (peu importe sur qui je tire)
-    // On trouve le bon train : 
-    // Si c'est Local et type=Soutien -> Mon train. Local & Sabot -> Train adverse.
-    // Si c'est Enemy et type=Soutien -> Train adverse. Enemy & Sabot -> Mon train.
+function ajouterBadgeSoutienSabotage(isLocalPlayer, numGare, carte, forceHidden) { 
     let isTrainJoueur = (isLocalPlayer && carte.type==='soutien') || (!isLocalPlayer && carte.type==='sabotage');
-    
     let train = isTrainJoueur ? playerTrain : enemyTrain; 
     let wagonDiv = train.wagons.find(w => w.dataset.gare == numGare); if (!wagonDiv) return; 
-    let badge = document.createElement('div'); badge.className = `badge-${carte.type} badge-hidden`; badge.innerText = carte.label; wagonDiv.appendChild(badge); 
+    let badge = document.createElement('div'); 
+    badge.className = `badge-${carte.type}`;
+    if (forceHidden) badge.classList.add('badge-hidden'); // L'ENNEMI NE VOIT RIEN
+    badge.innerText = carte.label; wagonDiv.appendChild(badge); 
 }
 
 function lancerPhase(numGare) { etapeGare = numGare; carteDejaJoueePourCettePhase = false; if (numGare === 1) { playerTrain.spawn(); enemyTrain.spawn(); document.getElementById('instruction-text').innerText = "Gare 1 !"; lancerTimer(20); } else if (numGare <= 5) { playerTrain.moveToStation(numGare, 10000); enemyTrain.moveToStation(numGare, 10000); document.getElementById('instruction-text').innerText = `Gare ${numGare}...`; lancerTimer(10); } else { document.getElementById('timer-display').style.display = 'none'; setTimeout(lancerCinematiqueCombat, 1000); } }
-function lancerTimer(sec) { clearInterval(intervalTimer); tempsTotalPhase = sec; tempsRestant = sec; actualiserAffichageTimer(); intervalTimer = setInterval(() => { tempsRestant--; actualiserAffichageTimer(); if (tempsRestant <= 0) { clearInterval(intervalTimer); if (phaseSoutienSabotage) { terminerPhaseSpeciale(); } else { if (!carteDejaJoueePourCettePhase) jouerCarteAleatoire(); setTimeout(() => { lancerPhase(etapeGare + 1); }, 1000); } } }, 1000); }
+
+function lancerTimer(sec) { 
+    clearInterval(intervalTimer); tempsTotalPhase = sec; tempsRestant = sec; actualiserAffichageTimer(); 
+    intervalTimer = setInterval(() => { 
+        tempsRestant--; actualiserAffichageTimer(); 
+        if (tempsRestant <= 0) { 
+            clearInterval(intervalTimer); // ARRÊTE NET LE COMPTEUR
+            if (phaseSoutienSabotage) { terminerPhaseSpeciale(); } 
+            else { 
+                if (!carteDejaJoueePourCettePhase) jouerCarteAleatoire(); 
+                // Pour éviter le spam d'AFK, on attend 1s proprement.
+                setTimeout(() => { lancerPhase(etapeGare + 1); }, 1000); 
+            } 
+        } 
+    }, 1000); 
+}
+
 function actualiserAffichageTimer() { let d = document.getElementById('timer-display'); d.innerText = `⏳ ${tempsRestant}s`; if (tempsRestant <= 5) d.classList.add('timer-danger'); else d.classList.remove('timer-danger'); }
 function jouerCarteAleatoire() { let c = mainDuJoueur.filter(x => x.type === 'combat'); if (c.length > 0) jouerCarteMonstre(c[0].id); }
 
@@ -280,23 +331,37 @@ function lancerCinematiqueCombat() {
 
 function demarrerPhaseSoutienSabotage() { phaseSoutienSabotage = true; document.getElementById('phase-title').innerText = "✨ SOUTIEN & SABOTAGE ✨"; document.getElementById('timer-display').style.display = 'block'; afficherMain(); lancerTimer(25); }
 
+// --- LA BARRIERE DE SYNCHRONISATION ---
 async function terminerPhaseSpeciale() {
     phaseSoutienSabotage = false; carteSelectionnee = null; afficherMain();
-    document.getElementById('phase-title').innerText = "⚔️ COMBAT FACE À FACE ⚔️"; document.getElementById('timer-display').style.display = 'none';
-    enemyTrain.revealWagons(); playerTrain.revealWagons(); 
-    setTimeout(resoudreCombats, 2000);
+    document.getElementById('phase-title').innerText = "⚔️ ATTENTE DE L'ADVERSAIRE... ⚔️"; document.getElementById('timer-display').style.display = 'none';
+    
+    amIReadyForCombat = true;
+    if (networkConn && networkConn.open) networkConn.send({ type: 'ready_for_combat' });
+    
+    verifierSiLesDeuxSontPretsPourCombat();
+}
+
+function verifierSiLesDeuxSontPretsPourCombat() {
+    if (amIReadyForCombat && isEnemyReadyForCombat) {
+        document.getElementById('phase-title').innerText = "⚔️ COMBAT FACE À FACE ⚔️"; 
+        enemyTrain.revealWagons(); playerTrain.revealWagons(); 
+        setTimeout(resoudreCombats, 2000);
+    }
 }
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function resoudreCombats() {
     let pSurivants = 0; let eSurivants = 0;
-    // Combat de Gare 5 à Gare 1 (Bas vers Haut)
+    // Combat de Gare 5 à Gare 1 (Bas vers Haut de l'écran)
     for(let i=5; i>=1; i--) {
         let pW = playerTrain.wagons.find(w => w.dataset.gare == i); let eW = enemyTrain.wagons.find(w => w.dataset.gare == i);
         if(!pW || !eW) continue;
+        
         pW.classList.add('clash-player'); eW.classList.add('clash-enemy');
         await sleep(600);
         let pStars = parseInt(pW.dataset.stars) + (parseInt(pW.dataset.badgeMod) || 0); let eStars = parseInt(eW.dataset.stars) + (parseInt(eW.dataset.badgeMod) || 0);
+        
         if (pStars > eStars) { eW.classList.add('faint'); pSurivants++; } 
         else if (eStars > pStars) { pW.classList.add('faint'); eSurivants++; } 
         else { pW.classList.add('faint'); eW.classList.add('faint'); }
@@ -310,7 +375,7 @@ async function resoudreCombats() {
     document.getElementById('my-score').innerText = myScore; document.getElementById('enemy-score').innerText = enemyScore;
     
     await sleep(2000);
-    // Le train continue !
+    // Le train quitte l'écran avec les survivants !
     playerTrain.driveOff(); enemyTrain.driveOff();
     await sleep(2000);
     currentRound++; demarrerRound(); 
