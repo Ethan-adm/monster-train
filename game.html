@@ -10,7 +10,38 @@
 </head>
 <body>
     
-    <div id="ready-screen">
+    <div id="deck-builder-screen">
+        <h1>Création du Deck (<span id="deck-total-count">0</span>/60)</h1>
+        
+        <div class="deck-builder-container">
+            <div class="catalog-section">
+                <h2>Catalogue par Genre</h2>
+                <div class="filters">
+                    <button onclick="filtrerGenre('Fantasy')">Fantasy</button>
+                    <button onclick="filtrerGenre('Dragon')">Dragon</button>
+                    <button onclick="filtrerGenre('Humain')">Humain</button>
+                </div>
+                <div id="catalog-grid" class="card-grid">
+                    </div>
+            </div>
+
+            <div class="deck-summary-section">
+                <h2>Ton Deck</h2>
+                <div class="limits-info">
+                    <p>⭐ 1 Étoile : <span id="count-1star">0</span>/15 (25%)</p>
+                    <p>⭐⭐ 2 Étoiles : <span id="count-2star">0</span>/19 (31%)</p>
+                    <p>⭐⭐⭐ 3 Étoiles : <span id="count-3star">0</span>/15 (25%)</p>
+                    <p>⭐⭐⭐⭐ 4 Étoiles : <span id="count-4star">0</span>/9 (14%)</p>
+                    <p>⭐⭐⭐⭐⭐ 5 Étoiles : <span id="count-5star">0</span>/2 (3%)</p>
+                </div>
+                <div id="my-deck-list" class="mini-card-list">
+                    </div>
+                <button id="validate-deck-btn" onclick="validerDeck()" disabled>Valider le Deck (0/60)</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="ready-screen" style="display: none;">
         <h1 id="ready-title">Préparation du Train...</h1>
         <p id="status-text">Connexion au réseau...</p>
         
@@ -24,12 +55,12 @@
                 <span id="enemy-ready-status" class="status-badge not-ready">Pas Prêt</span>
             </div>
         </div>
-
         <button id="ready-btn" onclick="toggleReady()" disabled>Je suis Prêt !</button>
     </div>
 
     <div id="game-content" style="display: none;">
-        <h1>🚂 Monster Train</h1>
+        <h1>🚂 Monster Train - Round <span id="round-number">1</span>/7</h1>
+        <div id="score-display">Score : Toi <span id="my-score">0</span> - <span id="enemy-score">0</span> Adv</div>
         
         <div class="game-area">
             <div id="header-info">
