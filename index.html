@@ -8,9 +8,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Avenir&family=Luckiest+Guy&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div id="login-container">
-        <div id="login-box">
-            <button id="back-hub-btn" disabled>← Retour au Hub</button>
+    <div id="app-container">
+        
+        <div id="auth-panel">
             <div id="monster-icon-main">🚂</div>
             <h1>Monster Train</h1>
             <p class="subtitle">Multijoueur en direct</p>
@@ -26,7 +26,42 @@
                 <button id="create-btn" onclick="creerPartie()">Créer un salon</button>
                 <button id="join-btn" onclick="rejoindrePartie()">Rejoindre</button>
             </div>
+            <p id="error-msg" style="color: #e74c3c; font-weight: bold; margin-top: 15px; display: none;"></p>
         </div>
+
+        <div id="deck-panel">
+            <h2 class="deck-title">Construis ton Deck (<span id="deck-total-count">0</span>/60)</h2>
+            
+            <div class="deck-builder-container">
+                <div class="catalog-section">
+                    <div class="filters">
+                        <button onclick="filtrerGenre('Humain')">Humain</button>
+                        <button onclick="filtrerGenre('Dragon')">Dragon</button>
+                        <button onclick="filtrerGenre('Fantasy')">Fantasy</button>
+                        <button onclick="filtrerGenre('Dark fantasy')">Dark Fantasy</button>
+                        <button onclick="filtrerGenre('Mythologie')">Mythologie</button>
+                        <button onclick="filtrerGenre('Légende urbaine')">Légende Urb.</button>
+                        <button onclick="filtrerGenre('Apocalypse')">Apocalypse</button>
+                        <button onclick="filtrerGenre('Aztec')">Aztec</button>
+                    </div>
+                    <div id="catalog-grid" class="card-grid"></div>
+                </div>
+
+                <div class="deck-summary-section">
+                    <h3>Quotas Étoiles</h3>
+                    <div class="limits-info">
+                        <p id="p-limit-1">⭐ 1 Étoile : <span id="count-1star">0</span>/15 (25%)</p>
+                        <p id="p-limit-2">⭐⭐ 2 Étoiles : <span id="count-2star">0</span>/19 (31%)</p>
+                        <p id="p-limit-3">⭐⭐⭐ 3 Étoiles : <span id="count-3star">0</span>/15 (25%)</p>
+                        <p id="p-limit-4">⭐⭐⭐⭐ 4 Étoiles : <span id="count-4star">0</span>/9 (14%)</p>
+                        <p id="p-limit-5">⭐⭐⭐⭐⭐ 5 Étoiles : <span id="count-5star">0</span>/2 (3%)</p>
+                    </div>
+                    <div id="my-deck-list" class="mini-card-list"></div>
+                    <button id="clear-deck-btn" onclick="viderDeck()">Vider le Deck</button>
+                </div>
+            </div>
+        </div>
+
     </div>
     <script src="js/app.js"></script>
 </body>
