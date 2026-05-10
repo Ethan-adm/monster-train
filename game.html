@@ -9,39 +9,8 @@
     <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
 </head>
 <body>
-    <div id="deck-builder-screen">
-        <h1 class="deck-title">Création du Deck (<span id="deck-total-count">0</span>/60)</h1>
-        <div class="deck-builder-container">
-            <div class="catalog-section">
-                <h2>Catalogue par Genre</h2>
-                <div class="filters">
-                    <button onclick="filtrerGenre('Humain')">Humain</button>
-                    <button onclick="filtrerGenre('Dragon')">Dragon</button>
-                    <button onclick="filtrerGenre('Fantasy')">Fantasy</button>
-                    <button onclick="filtrerGenre('Dark fantasy')">Dark Fantasy</button>
-                    <button onclick="filtrerGenre('Mythologie')">Mythologie</button>
-                    <button onclick="filtrerGenre('Légende urbaine')">Légende Urb.</button>
-                    <button onclick="filtrerGenre('Apocalypse')">Apocalypse</button>
-                    <button onclick="filtrerGenre('Aztec')">Aztec</button>
-                </div>
-                <div id="catalog-grid" class="card-grid"></div>
-            </div>
-            <div class="deck-summary-section">
-                <h2>Ton Deck</h2>
-                <div class="limits-info">
-                    <p id="p-limit-1">⭐ 1 Étoile : <span id="count-1star">0</span>/15 (25%)</p>
-                    <p id="p-limit-2">⭐⭐ 2 Étoiles : <span id="count-2star">0</span>/19 (31%)</p>
-                    <p id="p-limit-3">⭐⭐⭐ 3 Étoiles : <span id="count-3star">0</span>/15 (25%)</p>
-                    <p id="p-limit-4">⭐⭐⭐⭐ 4 Étoiles : <span id="count-4star">0</span>/9 (14%)</p>
-                    <p id="p-limit-5">⭐⭐⭐⭐⭐ 5 Étoiles : <span id="count-5star">0</span>/2 (3%)</p>
-                </div>
-                <div id="my-deck-list" class="mini-card-list"></div>
-                <button id="validate-deck-btn" onclick="validerDeck()" disabled>Valider (0/60)</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="ready-screen" style="display: none;">
+    
+    <div id="ready-screen">
         <h1 id="ready-title">Préparation du Train...</h1>
         <p id="status-text">Connexion au réseau...</p>
         <div class="players-status">
